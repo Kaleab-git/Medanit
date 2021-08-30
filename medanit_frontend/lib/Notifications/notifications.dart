@@ -13,26 +13,53 @@ class NotificationsState extends State<Notifications> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Color.fromRGBO(209, 117, 129, 1),
-        actions:[ 
-          IconButton(icon:Icon (Icons.local_pharmacy_sharp),onPressed: () {  },),
-          ],
-          leading: IconButton(icon:Icon (Icons.account_circle), onPressed: () {  },) ,
-      
+        actions: [
+          IconButton(
+            icon: Icon(Icons.local_pharmacy_sharp),
+            onPressed: () {},
+          ),
+        ],
+        leading: IconButton(
+          icon: Icon(Icons.account_circle),
+          onPressed: () {},
+        ),
       ),
       body: Container(
-        padding: EdgeInsets.symmetric(vertical: 40, horizontal: 15),
+        padding: EdgeInsets.symmetric(vertical: 20, horizontal: 15),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text("Notifications", style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 26
-                  ),),
-                  ElevatedButton(onPressed: (){}, child: Text("All"))
+                  Text(
+                    "Notifications",
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 26),
+                  ),
+                  ElevatedButton(onPressed: () {}, child: Text("All"))
                 ],
+              ),
+            ),
+            Expanded(
+              child: ListView.builder(
+                itemCount: 10,
+                itemBuilder: (ctx, index) => Container(
+                  padding: EdgeInsets.symmetric(vertical: 10, horizontal: 5),
+                  height: 100,
+                  child: Column(
+                    children: [
+                      Row(
+                        children: [
+                          CircleAvatar(
+                            radius: 3,
+                            backgroundColor: Colors.blue,
+                          )
+                        ],
+                      )
+                    ],
+                  ),
+                ),
               ),
             )
           ],
