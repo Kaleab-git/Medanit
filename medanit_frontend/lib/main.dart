@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
-import './Notifications/notifications.dart';
+import './tabroute.dart';
+
 void main() {
   runApp(MyApp());
 }
@@ -12,7 +13,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       debugShowCheckedModeBanner: false,
-      home: Notifications(),
+      home: TabRoute(),
     );
   }
 }
