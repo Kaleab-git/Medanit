@@ -112,7 +112,110 @@ class _addPostPageState extends State<addPostPage> {
                           ],
                         ),
                         Text('Side Effects' , style: TextStyle(fontSize: 22),),
-                        
+                        Padding(
+                          padding: const EdgeInsets.only(left: 25),
+                          child: Column(
+                            children: [
+                              Row(
+                                children: [
+                                  
+                                  Padding(
+                                    padding: const EdgeInsets.only(right: 10,top: 8),
+                                    child: RoundCheckBox(
+                                      onTap: (selected) {},
+                                    ),
+                                  ),
+                                  Text('constipation.',style:TextStyle(fontSize: 20))
+                                ],
+                              ),
+                              Row(
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.only(right: 10,top: 8),
+                                    child: RoundCheckBox(
+                                      onTap: (selected) {},
+                                    ),
+                                  ),
+                                  Text('Skin rash or dermatitis',style:TextStyle(fontSize: 20),)
+                                  
+                                ],
+                              ),
+                               Row(
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.only(right: 10,top: 8),
+                                    child: RoundCheckBox(
+                                      onTap: (selected) {},
+                                    ),
+                                  ),
+                                  Text('Diarrhea',style:TextStyle(fontSize: 20),)
+                                  
+                                ],
+                              ),
+                               Row(
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.only(right: 10,top: 8),
+                                    child: RoundCheckBox(
+                                      onTap: (selected) {},
+                                    ),
+                                  ),
+                                  Text('Dizziness',style:TextStyle(fontSize: 20),)
+                                  
+                                ],
+                              ),
+                               Row(
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.only(right: 10,top: 8),
+                                    child: RoundCheckBox(
+                                      onTap: (selected) {},
+                                    ),
+                                  ),
+                                  Text('Drowsiness',style:TextStyle(fontSize: 20),)
+                                  
+                                ],
+                              ),
+                               Row(
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.only(right: 10,top: 8),
+                                    child: RoundCheckBox(
+                                      onTap: (selected) {},
+                                    ),
+                                  ),
+                                  Text('Dry mouth',style:TextStyle(fontSize: 20),)
+                                  
+                                ],
+                              ),
+                               Row(
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.only(right: 10,top: 8),
+                                    child: RoundCheckBox(
+                                      onTap: (selected) {},
+                                    ),
+                                  ),
+                                  Text('Headache',style:TextStyle(fontSize: 20),)
+                                  
+                                ],
+                              ),
+                               Row(
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.only(right: 10,top: 8),
+                                    child: RoundCheckBox(
+                                      onTap: (selected) {},
+                                    ),
+                                  ),
+                                  Text('Insomnia',style:TextStyle(fontSize: 20),)
+                                  
+                                ],
+                              ),
+
+                            ],
+                          ),
+                        ),
                            Row(
                              mainAxisAlignment: MainAxisAlignment.end,
                              children: [
