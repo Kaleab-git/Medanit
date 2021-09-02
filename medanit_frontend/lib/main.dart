@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:medanit_frontend/screens/postPage.dart';
+import 'package:medanit_frontend/screens/addPostPage.dart';
 
 void main() => runApp(MyApp());
 
@@ -14,7 +14,7 @@ class MyApp extends StatelessWidget {
         primaryColor: Colors.red,
         accentColor: Color(0xFFFEF9EB),
       ),
-      home: postPage(),
+      home: addPostPage(),
     );
   }
 }
