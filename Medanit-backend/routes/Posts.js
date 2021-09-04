@@ -10,8 +10,8 @@ const router = express.Router();
 router.get('/', async (req, res) => {
     const pageSize = 10;
     const pageNumber = req.query.pageNumber;
-    let skipFactor = pageNumber ? (pageNumber - 1) * pageSize : 0;
-    let limitFactor = pageNumber ? pageSize : 0;
+    const skipFactor = pageNumber ? (pageNumber - 1) * pageSize : 0;
+    const limitFactor = pageNumber ? pageSize : 0;
 
     debug(`Page size: ${pageSize}\nPage number: ${pageNumber}`);
     
@@ -49,7 +49,8 @@ router.post('/', async (req, res) => {
         user_id: req.body.user_id,
         title: req.body.title,
         content: req.body.content,
-        side_effects: req.body.side_effects
+        side_effects: req.body.side_effects,
+        date: new Date()
     });
 
     post = await post.save()
@@ -72,7 +73,7 @@ router.put('/:id', async (req, res) => {
     if(req.query.action){
 
         handleUpvoteDownvoteNotification(req);
-        result = handleUpvoteDownvoteDB(req);
+        result = await handleUpvoteDownvoteDB(req);
 
     }else{
 
@@ -85,7 +86,7 @@ router.put('/:id', async (req, res) => {
         debug(newPost)
 
         oldPost.set(newPost);
-        result = await  oldPost.save();
+        result = await oldPost.save();
     }
     
 
@@ -124,22 +125,20 @@ async function handleUpvoteDownvoteNotification(req) {
 async function handleUpvoteDownvoteDB(req){
     const action = req.query.action;
     const postId = req.params.id;
-    let result;
 
+    debug(action);
     if(action === "upvote"){
-        debug("Upvote");
-        result = await Post.updateOne({ _id: postId }, {
+        return await Post.updateOne({ _id: postId }, {
             $inc: {
                 likes: 1
-            }
-        }, { new: true });
+            }}, 
+            { new: true });
     }else if(action === "downvote"){
-        debug("Downvote");
-        result = await Post.updateOne({ _id: postId }, {
+        return await Post.updateOne({ _id: postId }, {
             $inc: {
                 dislikes: 1
-            }
-        }, { new: true });
+            }}, 
+            { new: true });
     }
     
     

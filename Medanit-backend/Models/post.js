@@ -5,7 +5,7 @@ Joi.objectId = require('joi-objectid')(Joi);
 
 const Post = mongoose.model('Post', new mongoose.Schema({
     user_id: {
-        type: mongoose.Schema.Types.ObjectId,
+        type: mongoose.Types.ObjectId,
         required: true
     },
 
