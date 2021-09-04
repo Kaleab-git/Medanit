@@ -53,7 +53,7 @@ router.post('/', async (req, res) => {
 
     comment = await comment.save()
 
-    res.status(201).send(customElements);
+    res.status(201).send(comment);
 });
 
 /* PUT METHOD COMMENT */
@@ -96,9 +96,9 @@ router.put('/:id', async (req, res) => {
 router.delete('/:id', async (req, res) => {
     const id = req.params.id;
 
-    // check if it exists 
-
-    res.send(`Deleting a comment with ID: ${id}`);
+    const result = await Comment.deleteOne( { _id: id } )
+    if(!result) res.status(404).send('Resource not found!');
+    res.send(result);
 });
 
 
