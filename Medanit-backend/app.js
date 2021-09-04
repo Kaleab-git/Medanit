@@ -1,4 +1,5 @@
 const debug = require('debug')('app:startup');  // set/export DEBUG=app:startup
+const mongoose = require('mongoose');
 const express = require('express');
 const config = require('config');
 const path = require('path');
@@ -17,15 +18,18 @@ app.use(express.json());
 
 // config
 //console.log(`App name: ${config.get('name')}`);
-//console.log(`App db connection string: ${config.get('db.connection_string')}`);
 //console.log(`App db password: ${config.get('db.password')}`);
 
 
 if (app.get('env') === 'development') {
     app.use(morgan('tiny'));
     debug('using Morgan');
-} 
+}
 
+// connect to DB
+mongoose.connect(config.get('db.connection_string'), { useNewUrlParser: true, useUnifiedTopology: true })
+    .then(() => debug('Connected to MongoDB'))
+    .catch(err => console.error('Could not connect to MongoDB ', err)); 
 // ROUTES
 app.use('/api/posts', posts);
 app.use('/api/posts/:post_id/comments', comments);

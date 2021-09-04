@@ -1,7 +1,7 @@
 {
   "name": "Medanit - development",
   "db": {
-    "connection_string": "mongo connection string",
+    "connection_string": "mongodb://localhost/Medanit",
     "password": ""
   }
 

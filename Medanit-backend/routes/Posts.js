@@ -1,93 +1,111 @@
 const debug = require('debug')('app:posts');        // set/export DEBUG=app:posts
 const express = require('express');
-const Joi = require('joi');
-Joi.objectId = require('joi-objectid')(Joi)
+
+const { Post, validatePost, validatePut } = require('../Models/post');
+
 const router = express.Router();
 
 
 /* GET POSTS. */
-router.get('/', (req, res) => {
-    res.send("Get Posts");
+router.get('/', async (req, res) => {
+    const pageSize = 10;
+    const pageNumber = req.query.pageNumber;
+    let skipFactor = pageNumber ? (pageNumber - 1) * pageSize : 0;
+    let limitFactor = pageNumber ? pageSize : 0;
+
+    debug(`Page size: ${pageSize}\nPage number: ${pageNumber}`);
+    
+    const posts = await Post
+        .find()
+        .skip( skipFactor )
+        .limit( limitFactor )
+        .sort( { date: 1 } )
+        .select()
+    
+    res.send(posts);     
+
 });
 
 
 /* GET POST WITH ID */
-router.get('/:id', (req, res) => {
+router.get('/:id', async (req, res) => {
     const id = req.params.id;
+    
+    //to validate the id of the post, if it's a valid objecId
 
-    // first look up resource, if it doesn't exist return with 404
 
-
-    res.send(`Get post with ID: ${id}`);
+    const post = await Post.findById(id);
+    if(!post) return res.status(404).send('Resource not found!');
+    res.send(post);
 });
 
 
 /* POST A NEW POST */
-router.post('/', (req, res) => {
+router.post('/', async (req, res) => {
     const { error, value } = validatePost(req.body);
-        if (error) return res.status(400).send(error.message);
+    if (error) return res.status(400).send(error.message);
 
+    let post = new Post({
+        user_id: req.body.user_id,
+        title: req.body.title,
+        content: req.body.content,
+        side_effects: req.body.side_effects
+    });
 
-    res.status(201).json(value);
+    post = await post.save()
+
+    res.status(201).json(post);
 });
 
 /* PUT METHOD FOR A POST */
-router.put('/:id', (req, res) => {
+router.put('/:id', async (req, res) => {
     const id = req.params.id;
 
-    
-
-    // first look up resource, if it doesn't exist return with 404
-
-    const { error, value } = validateEdit(req.body);
+    const { error, value } = validatePut(req.body);
     if (error) return res.status(400).send(error.message);
 
+    const oldPost = await Post.findById(id);
+    if(!oldPost) return res.status(404).send('Resource not found!');
+    
+    let result;
 
-    handleUpvoteDownvote(req);
+    if(req.query.action){
+
+        handleUpvoteDownvoteNotification(req);
+        result = handleUpvoteDownvoteDB(req);
+
+    }else{
+
+        const newPost = {
+            title: req.body.title || oldPost.title,
+            content: req.body.content || oldPost.content,
+            side_effects: req.body.side_effects || oldPost.side_effects
+        };
+
+        debug(newPost)
+
+        oldPost.set(newPost);
+        result = await  oldPost.save();
+    }
     
 
-    res.send(`Put method on post with ID: ${id}`);
+    res.status(204).send(result);
 });
 
 
 /* DELETE METHOD FOR A POST */
-router.delete('/:id',  (req, res) => {
+router.delete('/:id', async  (req, res) => {
     const id = req.params.id;
 
-    // first look up resource, if it doesn't exist return with 404
-
-
-    res.send(`Deleting a post with ID: ${id}`);
+    const result = await Post.deleteOne( { _id: id } )
+    if(!result) res.status(404).send('Resource not found!');
+    res.send(result);
 });
 
 
 
-function validatePost(post) {
 
-    const schema = Joi.object({
-        user_id: Joi.objectId().required(),
-        title: Joi.string().max(50).required(),
-        content: Joi.string().max(1000).required(),
-        side_effects: Joi.array().required().min(0)
-    });
-
-    return schema.validate(post);
-};
-
-
-function validateEdit(post) {
-
-    const schema = Joi.object({
-        user_id: Joi.objectId().required(),
-        title: Joi.string().max(50),
-        content: Joi.string().max(1000),
-        side_effects: Joi.array().min(0)
-    });
-
-    return schema.validate(post);
-};
-
-function handleUpvoteDownvote(req) {
+async function handleUpvoteDownvoteNotification(req) {
     const action = req.query.action;
     const postId = req.params.id;
     const userId = req.body.user_id;
@@ -102,5 +120,29 @@ function handleUpvoteDownvote(req) {
 
     }
 };
+
+async function handleUpvoteDownvoteDB(req){
+    const action = req.query.action;
+    const postId = req.params.id;
+    let result;
+
+    if(action === "upvote"){
+        debug("Upvote");
+        result = await Post.updateOne({ _id: postId }, {
+            $inc: {
+                likes: 1
+            }
+        }, { new: true });
+    }else if(action === "downvote"){
+        debug("Downvote");
+        result = await Post.updateOne({ _id: postId }, {
+            $inc: {
+                dislikes: 1
+            }
+        }, { new: true });
+    }
+    
+    
+}
 
 module.exports = router;
