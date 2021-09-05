@@ -1,4 +1,5 @@
 const moment = require('moment');
+const mongoose = require('mongoose');
 const debug = require('debug')('app:posts');        // set/export DEBUG=app:posts
 const express = require('express');
 
@@ -17,25 +18,20 @@ router.get('/', async (req, res) => {
     // debug(`Page size: ${pageSize}\nPage number: ${pageNumber}`);
     
     try{
-        const posts = await Post
+        let posts = await Post
             .find()
             .skip( skipFactor )
             .limit( limitFactor )
-            .sort( { date: 1 } )
+            .sort( { date: -1 } )
             .select()
         
-            /* TODO: 
-                    => it's printing the desired result to the console but is sending d/t one
-                       to the client    
-            */ 
-
-        // posts.forEach(post => debug(post.date));
-
+        
+        posts = updateDate(posts)
         res.send(posts);
 
     }catch(err){
         debug(err);
-        res.status(400).send(err.message);
+        res.status(500).send("Internal server error while trying to get posts!");
     }
 
 });
@@ -43,16 +39,18 @@ router.get('/', async (req, res) => {
 
 /* GET POST WITH ID */
 router.get('/:id', async (req, res) => {
-    try {
 
+    if(!mongoose.Types.ObjectId.isValid(req.params.id)) return res.status(404).send('Invalid Post Id!');
+
+    try {
         //to validate the id of the post, if it's a valid objecId
         const post = await Post.findById(req.params.id);
         if(!post) return res.status(404).send('Resource not found!');
-        res.send(post);
+        res.send({...post._doc, date: post.date});
 
     }catch(err){
         debug(err.message);
-        res.status(400).send(err.message);
+        res.status(500).send("Internal server error while trying to get a post!");
     }
 });
 
@@ -72,16 +70,19 @@ router.post('/', async (req, res) => {
 
     try{
         post = await post.save()
-        res.status(201).json(post);
+        res.status(201).send({...post._doc, date: post.date});
     }catch(err){
         debug(err.message);
-        res.status(400).send(err.message);
+        res.status(500).send("Internal server error while trying to create a new post!");
     }
 });
 
 /* PUT METHOD FOR A POST */
 router.put('/:id', async (req, res) => {
     const id = req.params.id;
+
+    if(!mongoose.Types.ObjectId.isValid(id)) return res.status(404).send('Invalid Post Id!');
+    
 
     const { error, value } = validatePut(req.body);
     if (error) return res.status(400).send(error.message);
@@ -91,40 +92,35 @@ router.put('/:id', async (req, res) => {
     try{
         oldPost = await Post.findById(id);
         if(!oldPost) return res.status(404).send('Resource not found!');
-    }catch(err){
-        debug(err.message);
-        res.status(400).send(err.message);
-    }
-    
-    let result;
 
-    if(req.query.action){
+        let result;
+        if(req.query.action){
 
-        handleUpvoteDownvoteNotification(req, res);
-        result = await handleUpvoteDownvoteDB(req, res);
+            handleUpvoteDownvoteNotification(req, res);
+            result = await handleUpvoteDownvoteDB(req, res);
 
-    }else{
+        }else{
 
-        const newPost = {
-            title: req.body.title || oldPost.title,
-            content: req.body.content || oldPost.content,
-            side_effects: req.body.side_effects || oldPost.side_effects
-        };
+            const newPost = {
+                title: req.body.title || oldPost.title,
+                content: req.body.content || oldPost.content,
+                side_effects: req.body.side_effects || oldPost.side_effects
+            };
 
-        debug(newPost)
-
-        try{
+            // debug(newPost)
             oldPost.set(newPost);
             result = await oldPost.save();
-        }catch(err){
-            debug(err.message);
-            res.status(400).send(err.message);
         }
-      
+
+        res.status(204).send(result);
+
+    }catch(err){
+        debug(err.message);
+        res.status(500).send("Internal server error while trying to edit a post!");
+
     }
     
-
-    res.status(204).send(result);
+    
 });
 
 
@@ -132,20 +128,24 @@ router.put('/:id', async (req, res) => {
 router.delete('/:id', async  (req, res) => {
     const id = req.params.id;
 
+    if(!mongoose.Types.ObjectId.isValid(id)) return res.status(404).send('Invalid Post Id!');
+
+
     try{
         const result = await Post.deleteOne( { _id: id } )
         if(!result) res.status(404).send('Resource not found!');
         res.send(result);
     }catch(err){
         debug(err.message);
-        res.status(400).send(err.message);
+        res.status(500).send("Internal server error while trying to delete a post!");
+
     }
 });
 
 
 
 
-async function handleUpvoteDownvoteNotification(req, res) {
+async function handleUpvoteDownvoteNotification(req) {
     const action = req.query.action;
     const postId = req.params.id;
     const userId = req.body.user_id;
@@ -161,39 +161,40 @@ async function handleUpvoteDownvoteNotification(req, res) {
     }
 };
 
-async function handleUpvoteDownvoteDB(req, res){
+async function handleUpvoteDownvoteDB(req){
     const action = req.query.action;
     const postId = req.params.id;
 
     debug(action);
     if(action === "upvote"){
+        return await Post.updateOne({ _id: postId }, {
+            $inc: {
+                likes: 1
+            }}, 
+            { new: true });
         
-        try{
-            return await Post.updateOne({ _id: postId }, {
-                $inc: {
-                    likes: 1
-                }}, 
-                { new: true });
-        }catch(err){
-            debug(err.message);
-            res.status(400).send(err.message);
-        }
-
     }else if(action === "downvote"){
-        
-        try{
-            return await Post.updateOne({ _id: postId }, {
-                $inc: {
-                    dislikes: 1
-                }}, 
-                { new: true });
-        }catch(err){
-            debug(err.message);
-            res.status(400).send(err.message);
-        }
+        return await Post.updateOne({ _id: postId }, {
+            $inc: {
+                dislikes: 1
+            }}, 
+            { new: true });
     }
     
     
+}
+
+function updateDate(posts){
+    let postsFinal = [];
+    posts.forEach(post =>{
+        let date = post.date;
+
+        postsFinal.push({
+            ...post._doc,
+            date: date
+        })
+    });
+    return postsFinal;
 }
 
 module.exports = router;
