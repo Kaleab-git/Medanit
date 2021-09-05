@@ -1,3 +1,4 @@
+const moment = require('moment');
 const mongoose = require('mongoose');
 const Joi = require('joi');
 Joi.objectId = require('joi-objectid')(Joi);
@@ -27,20 +28,26 @@ const Post = mongoose.model('Post', new mongoose.Schema({
         type: [ String ],
         required: true,
         minlength: 0,
-        maxlength: 10
+        maxlength: 10,
+        enum: ["headache", "dizziness", "constipation", "skin rash or dermatitis", 
+                "drowsiness", "dry mouth", "headache", "insomnia", "nausea"]
     },
+
     likes: { 
         type: Number, 
         default: 0
     },
+
     dislikes: { 
         type: Number, 
         default: 0
     },
+
     date: {
         type: Date,
         required: false,
-        default: new Date()
+        default: new Date(),
+        get: date => moment(date, "YYYY-MM-DD[T00:00:00.000Z]").fromNow()
     }
 
 

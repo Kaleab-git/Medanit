@@ -1,3 +1,4 @@
+const moment = require('moment');
 const debug = require('debug')('app:posts');        // set/export DEBUG=app:posts
 const express = require('express');
 
@@ -13,30 +14,46 @@ router.get('/', async (req, res) => {
     const skipFactor = pageNumber ? (pageNumber - 1) * pageSize : 0;
     const limitFactor = pageNumber ? pageSize : 0;
 
-    debug(`Page size: ${pageSize}\nPage number: ${pageNumber}`);
+    // debug(`Page size: ${pageSize}\nPage number: ${pageNumber}`);
     
-    const posts = await Post
-        .find()
-        .skip( skipFactor )
-        .limit( limitFactor )
-        .sort( { date: 1 } )
-        .select()
-    
-    res.send(posts);     
+    try{
+        const posts = await Post
+            .find()
+            .skip( skipFactor )
+            .limit( limitFactor )
+            .sort( { date: 1 } )
+            .select()
+        
+            /* TODO: 
+                    => it's printing the desired result to the console but is sending d/t one
+                       to the client    
+            */ 
+
+        // posts.forEach(post => debug(post.date));
+
+        res.send(posts);
+
+    }catch(err){
+        debug(err);
+        res.status(400).send(err.message);
+    }
 
 });
 
 
 /* GET POST WITH ID */
 router.get('/:id', async (req, res) => {
-    const id = req.params.id;
-    
-    //to validate the id of the post, if it's a valid objecId
+    try {
 
+        //to validate the id of the post, if it's a valid objecId
+        const post = await Post.findById(req.params.id);
+        if(!post) return res.status(404).send('Resource not found!');
+        res.send(post);
 
-    const post = await Post.findById(id);
-    if(!post) return res.status(404).send('Resource not found!');
-    res.send(post);
+    }catch(err){
+        debug(err.message);
+        res.status(400).send(err.message);
+    }
 });
 
 
@@ -53,9 +70,13 @@ router.post('/', async (req, res) => {
         date: new Date()
     });
 
-    post = await post.save()
-
-    res.status(201).json(post);
+    try{
+        post = await post.save()
+        res.status(201).json(post);
+    }catch(err){
+        debug(err.message);
+        res.status(400).send(err.message);
+    }
 });
 
 /* PUT METHOD FOR A POST */
@@ -65,15 +86,22 @@ router.put('/:id', async (req, res) => {
     const { error, value } = validatePut(req.body);
     if (error) return res.status(400).send(error.message);
 
-    const oldPost = await Post.findById(id);
-    if(!oldPost) return res.status(404).send('Resource not found!');
+    let oldPost;
+
+    try{
+        oldPost = await Post.findById(id);
+        if(!oldPost) return res.status(404).send('Resource not found!');
+    }catch(err){
+        debug(err.message);
+        res.status(400).send(err.message);
+    }
     
     let result;
 
     if(req.query.action){
 
-        handleUpvoteDownvoteNotification(req);
-        result = await handleUpvoteDownvoteDB(req);
+        handleUpvoteDownvoteNotification(req, res);
+        result = await handleUpvoteDownvoteDB(req, res);
 
     }else{
 
@@ -85,8 +113,14 @@ router.put('/:id', async (req, res) => {
 
         debug(newPost)
 
-        oldPost.set(newPost);
-        result = await oldPost.save();
+        try{
+            oldPost.set(newPost);
+            result = await oldPost.save();
+        }catch(err){
+            debug(err.message);
+            res.status(400).send(err.message);
+        }
+      
     }
     
 
@@ -98,15 +132,20 @@ router.put('/:id', async (req, res) => {
 router.delete('/:id', async  (req, res) => {
     const id = req.params.id;
 
-    const result = await Post.deleteOne( { _id: id } )
-    if(!result) res.status(404).send('Resource not found!');
-    res.send(result);
+    try{
+        const result = await Post.deleteOne( { _id: id } )
+        if(!result) res.status(404).send('Resource not found!');
+        res.send(result);
+    }catch(err){
+        debug(err.message);
+        res.status(400).send(err.message);
+    }
 });
 
 
 
 
-async function handleUpvoteDownvoteNotification(req) {
+async function handleUpvoteDownvoteNotification(req, res) {
     const action = req.query.action;
     const postId = req.params.id;
     const userId = req.body.user_id;
@@ -122,23 +161,36 @@ async function handleUpvoteDownvoteNotification(req) {
     }
 };
 
-async function handleUpvoteDownvoteDB(req){
+async function handleUpvoteDownvoteDB(req, res){
     const action = req.query.action;
     const postId = req.params.id;
 
     debug(action);
     if(action === "upvote"){
-        return await Post.updateOne({ _id: postId }, {
-            $inc: {
-                likes: 1
-            }}, 
-            { new: true });
+        
+        try{
+            return await Post.updateOne({ _id: postId }, {
+                $inc: {
+                    likes: 1
+                }}, 
+                { new: true });
+        }catch(err){
+            debug(err.message);
+            res.status(400).send(err.message);
+        }
+
     }else if(action === "downvote"){
-        return await Post.updateOne({ _id: postId }, {
-            $inc: {
-                dislikes: 1
-            }}, 
-            { new: true });
+        
+        try{
+            return await Post.updateOne({ _id: postId }, {
+                $inc: {
+                    dislikes: 1
+                }}, 
+                { new: true });
+        }catch(err){
+            debug(err.message);
+            res.status(400).send(err.message);
+        }
     }
     
     
