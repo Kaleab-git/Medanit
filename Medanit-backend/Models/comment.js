@@ -1,3 +1,4 @@
+const moment = require('moment');
 const mongoose = require('mongoose');
 const Joi = require('joi');
 Joi.objectId = require('joi-objectid')(Joi);
@@ -33,7 +34,8 @@ const Comment = mongoose.model('Comment', new mongoose.Schema({
     
     date: {
         type: Date,
-        default: new Date()
+        default: new Date(),
+        get: date => moment(date, "YYYY-MM-DD[T00:00:00.000Z]").fromNow()
     }
 }));
 
@@ -56,6 +58,11 @@ function validatePut(comment) {
     return schema.validate(comment);
 }
 
+function validateId(id){
+    return mongoose.Types.ObjectId.isValid(id)
+}
+
 exports.Comment = Comment;
 exports.validatePost = validatePost;
 exports.validatePut = validatePut;
+exports.validateId = validateId;
