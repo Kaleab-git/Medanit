@@ -31,6 +31,7 @@ router.get('/', async (req, res) => {
             .sort( { date: -1 } )
             .select()
         
+
         comments = updateDate(comments); 
 
         res.send(comments);
@@ -63,6 +64,9 @@ router.post('/', async (req, res) => {
             post_id: postId,
             date: new Date()
         });
+
+        post.comments.push(comment);
+        post.save();
 
         comment = await comment.save()
         res.status(201).send({...comment._doc, date: comment.date});

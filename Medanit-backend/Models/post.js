@@ -1,5 +1,6 @@
 const moment = require('moment');
 const mongoose = require('mongoose');
+const { Comment } = require('./comment');
 const Joi = require('joi');
 Joi.objectId = require('joi-objectid')(Joi);
 
@@ -14,14 +15,16 @@ const Post = mongoose.model('Post', new mongoose.Schema({
         type: String,
         required: true,
         minlength: 2,
-        maxlength: 70
+        maxlength: 70,
+        trim: true
     },
 
     content: {
         type: String,
         required: true,
         minlength: 100,
-        maxlength: 1000
+        maxlength: 1000,
+        trim: true
     },
 
     side_effects: {
@@ -31,6 +34,11 @@ const Post = mongoose.model('Post', new mongoose.Schema({
         maxlength: 10,
         enum: ["headache", "dizziness", "constipation", "skin rash or dermatitis", 
                 "drowsiness", "dry mouth", "headache", "insomnia", "nausea"]
+    },
+
+    comments: {
+        type: [ mongoose.Schema.Types.ObjectId ] ,
+        ref: 'Comment'
     },
 
     likes: { 
