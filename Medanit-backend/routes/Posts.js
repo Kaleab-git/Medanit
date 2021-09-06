@@ -27,6 +27,7 @@ router.get('/', async (req, res) => {
         
         
         posts = updateDate(posts)
+        posts = updateComment(posts);
         res.send(posts);
 
     }catch(err){
@@ -44,9 +45,9 @@ router.get('/:id', async (req, res) => {
 
     try {
         //to validate the id of the post, if it's a valid objecId
-        const post = await Post.findById(req.params.id);
+        const post = await Post.findById(req.params.id).populate('comments');
         if(!post) return res.status(404).send('Resource not found!');
-        res.send({...post._doc, date: post.date});
+        res.send({...post._doc, date: post.date, comments: post.comments.length});
 
     }catch(err){
         debug(err.message);
@@ -69,8 +70,16 @@ router.post('/', async (req, res) => {
     });
 
     try{
-        post = await post.save()
-        res.status(201).send({...post._doc, date: post.date});
+        post.validate(async (err) => {
+            if(err){
+                return res.status(400).send(err.message);
+            }else{
+                post = await post.save();
+                res.status(201).send({...post._doc, date: post.date});
+            }
+        });
+        
+        
     }catch(err){
         debug(err.message);
         res.status(500).send("Internal server error while trying to create a new post!");
@@ -93,26 +102,39 @@ router.put('/:id', async (req, res) => {
         oldPost = await Post.findById(id);
         if(!oldPost) return res.status(404).send('Resource not found!');
 
-        let result;
         if(req.query.action){
 
             handleUpvoteDownvoteNotification(req, res);
-            result = await handleUpvoteDownvoteDB(req, res);
-
+            await handleUpvoteDownvoteDB(req, res);
+            res.status(204).send();
         }else{
 
-            const newPost = {
+            let newPost = {
+                user_id: oldPost.user_id,
                 title: req.body.title || oldPost.title,
                 content: req.body.content || oldPost.content,
                 side_effects: req.body.side_effects || oldPost.side_effects
             };
 
-            // debug(newPost)
-            oldPost.set(newPost);
-            result = await oldPost.save();
+            newPost = new Post(newPost);
+            newPost._id = oldPost._id; // we need to update it to the old ID b/c the object we just created gets a new ID
+            newPost.validate(async (err) => {
+                if(err){
+                    res.status(400).send(err.message);
+                }else{
+                    try{
+                        oldPost.set(newPost);
+                        let result = await oldPost.save();
+                        res.status(204).send(result);
+                    }catch(err){
+                        debug(err.message);
+                    }
+                }
+            });
+            
         }
 
-        res.status(204).send(result);
+        
 
     }catch(err){
         debug(err.message);
@@ -192,6 +214,18 @@ function updateDate(posts){
         postsFinal.push({
             ...post._doc,
             date: date
+        })
+    });
+    return postsFinal;
+}
+
+function updateComment(posts){
+    let postsFinal = [];
+    posts.forEach(post =>{
+        let count = post.comments.length;
+        postsFinal.push({
+            ...post,
+            comments: count
         })
     });
     return postsFinal;
