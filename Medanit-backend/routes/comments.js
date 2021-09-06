@@ -34,11 +34,11 @@ router.get('/', async (req, res) => {
 
         comments = updateDate(comments); 
 
-        res.send(comments);
+        return res.send(comments);
 
     }catch(err){
         debug(err.message);
-        res.status(500).send("Internal server error while getting comments!");
+        return res.status(500).send("Internal server error while getting comments!");
     }
 
 });
@@ -69,11 +69,11 @@ router.post('/', async (req, res) => {
         post.save();
 
         comment = await comment.save()
-        res.status(201).send({...comment._doc, date: comment.date});
+        return res.status(201).send({...comment._doc, date: comment.date});
         
     }catch(err){
         debug(err.message);
-        res.status(500).send("Internal server error while saving comment!")
+        return res.status(500).send("Internal server error while saving comment!")
     }
 });
 
@@ -110,11 +110,11 @@ router.put('/:id', async (req, res) => {
             result = await oldComment.save();
         }
 
-        res.status(204).send(result);
+        return res.status(204).send(result);
 
     }catch(err){
         debug(err.message);
-        res.status(500).send("Internal server error while modifying comment!")
+        return res.status(500).send("Internal server error while modifying comment!")
     }
 });
 
@@ -130,10 +130,10 @@ router.delete('/:id', async (req, res) => {
     try{
         const result = await Comment.deleteOne( { _id: id } )
         if(!result) res.status(404).send('Resource not found!');
-        res.send(result);
+        return res.send(result);
     }catch(err){
         debug(err);
-        res.status(500).send("Internal server error while trying to delete comment!");
+        return res.status(500).send("Internal server error while trying to delete comment!");
     }
     
 });
