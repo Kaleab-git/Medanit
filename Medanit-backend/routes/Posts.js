@@ -12,14 +12,21 @@ const router = express.Router();
 router.get('/', async (req, res) => {
     const pageSize = 10;
     const pageNumber = req.query.pageNumber;
+    const searchTerm = req.query.search ? req.query.search.trim(): undefined;
     const skipFactor = pageNumber ? (pageNumber - 1) * pageSize : 0;
     const limitFactor = pageNumber ? pageSize : 0;
 
     // debug(`Page size: ${pageSize}\nPage number: ${pageNumber}`);
+
+    if(searchTerm) debug(`Search term: '${searchTerm}'`);
     
     try{
         let posts = await Post
             .find()
+            .or([ 
+                { title: new RegExp(searchTerm, 'i') },
+                { content: new RegExp(searchTerm, 'i') }
+            ])
             .skip( skipFactor )
             .limit( limitFactor )
             .sort( { date: -1 } )
@@ -28,11 +35,11 @@ router.get('/', async (req, res) => {
         
         posts = updateDate(posts)
         posts = updateComment(posts);
-        res.send(posts);
+        return res.send(posts);
 
     }catch(err){
         debug(err);
-        res.status(500).send("Internal server error while trying to get posts!");
+        return res.status(500).send("Internal server error while trying to get posts!");
     }
 
 });
@@ -47,11 +54,11 @@ router.get('/:id', async (req, res) => {
         //to validate the id of the post, if it's a valid objecId
         const post = await Post.findById(req.params.id).populate('comments');
         if(!post) return res.status(404).send('Resource not found!');
-        res.send({...post._doc, date: post.date, comments: post.comments.length});
+        return res.send({...post._doc, date: post.date, comments: post.comments.length});
 
     }catch(err){
         debug(err.message);
-        res.status(500).send("Internal server error while trying to get a post!");
+        return res.status(500).send("Internal server error while trying to get a post!");
     }
 });
 
@@ -75,14 +82,14 @@ router.post('/', async (req, res) => {
                 return res.status(400).send(err.message);
             }else{
                 post = await post.save();
-                res.status(201).send({...post._doc, date: post.date});
+                return res.status(201).send({...post._doc, date: post.date});
             }
         });
         
         
     }catch(err){
         debug(err.message);
-        res.status(500).send("Internal server error while trying to create a new post!");
+        return res.status(500).send("Internal server error while trying to create a new post!");
     }
 });
 
@@ -106,7 +113,7 @@ router.put('/:id', async (req, res) => {
 
             handleUpvoteDownvoteNotification(req, res);
             await handleUpvoteDownvoteDB(req, res);
-            res.status(204).send();
+            return res.status(204).send();
         }else{
 
             let newPost = {
@@ -125,9 +132,10 @@ router.put('/:id', async (req, res) => {
                     try{
                         oldPost.set(newPost);
                         let result = await oldPost.save();
-                        res.status(204).send(result);
+                        return res.status(204).send(result);
                     }catch(err){
                         debug(err.message);
+                        res.status(500).send("Internal server error while trying to edit a post!");
                     }
                 }
             });
@@ -156,10 +164,10 @@ router.delete('/:id', async  (req, res) => {
     try{
         const result = await Post.deleteOne( { _id: id } )
         if(!result) res.status(404).send('Resource not found!');
-        res.send(result);
+        return res.send(result);
     }catch(err){
         debug(err.message);
-        res.status(500).send("Internal server error while trying to delete a post!");
+        return res.status(500).send("Internal server error while trying to delete a post!");
 
     }
 });
