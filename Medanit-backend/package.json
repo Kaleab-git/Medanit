@@ -1,0 +1,25 @@
+{
+  "name": "medanit",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "nodemon app.js"
+  },
+  "description": "Medhanit",
+  "author": {
+    "name": "NotpadCorders"
+  },
+  "dependencies": {
+    "config": "^3.3.6",
+    "express": "^4.14.0",
+    "joi": "^17.4.2",
+    "joi-objectid": "^3.0.1",
+    "moment": "^2.29.1",
+    "mongoose": "^6.0.4"
+  },
+  "devDependencies": {
+    "debug": "^2.6.9",
+    "morgan": "^1.10.0",
+    "nodemon": "^2.0.12"
+  }
+}
