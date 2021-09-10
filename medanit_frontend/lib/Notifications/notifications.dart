@@ -33,9 +33,8 @@ class NotificationsState extends State<Notifications> {
                 itemCount: 10,
                 itemBuilder: (ctx, index) => Container(
                   decoration: BoxDecoration(
-                    color: Colors.grey[200],
-                    borderRadius: BorderRadius.circular(6)
-                  ),
+                      color: Colors.grey[200],
+                      borderRadius: BorderRadius.circular(6)),
                   padding: EdgeInsets.symmetric(vertical: 10, horizontal: 5),
                   margin: EdgeInsets.symmetric(vertical: 3),
                   height: 100,
@@ -49,7 +48,8 @@ class NotificationsState extends State<Notifications> {
                             radius: 3,
                             backgroundColor: Colors.blue,
                           ),
-                          Text("James Camry upvoted your post: Ginger for Fever")
+                          Text(
+                              "James Camry upvoted your post: Ginger for Fever")
                         ],
                       ),
                       Text("just now")
@@ -61,7 +61,6 @@ class NotificationsState extends State<Notifications> {
           ],
         ),
       ),
-    
     );
   }
 }
