@@ -14,7 +14,16 @@ class _addPostPageState extends State<addPostPage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Color.fromRGBO(209, 117, 129, 1),
-        leading: Icon(    Icons.search  ),
+        leading:
+        TextButton(
+            style: TextButton.styleFrom(
+              textStyle: const TextStyle(fontSize: 20),
+            ),
+            onPressed: () {},
+            child:Icon(    Icons.person  ),
+          ),
+        
+        
         actions: <Widget>[
 
           Padding(
@@ -23,6 +32,7 @@ class _addPostPageState extends State<addPostPage> {
                   Icons.more_vert
               ),
             ),
+            
         ],
       ),
 
