@@ -167,6 +167,7 @@ class DoctorState extends State<Doctor> {
                       ),
                       Text(
                         'In publishing and graphic design, Lorem ipsum is a\n placeholder text commonly used to demonstrate\n the visual form of a document or a typeface without\n relying on meaningful content. Lorem ipsum may be\n used as a placeholder before final copy is available.',
+                        overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           fontSize: 14.0,
                           fontStyle: FontStyle.italic,
@@ -216,6 +217,7 @@ class DoctorState extends State<Doctor> {
                       ),
                       Text(
                         'In publishing and graphic design, Lorem ipsum is a\n placeholder text commonly used to demonstrate\n the visual form of a document or a typeface without\n relying on meaningful content. Lorem ipsum may be\n used as a placeholder before final copy is available.',
+                        overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           fontSize: 14.0,
                           fontStyle: FontStyle.italic,
