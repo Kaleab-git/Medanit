@@ -14,16 +14,16 @@ class _addPostPageState extends State<addPostPage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Color.fromRGBO(209, 117, 129, 1),
-        leading: Icon(    Icons.search  ),
-        actions: <Widget>[
-
-          Padding(
-            padding: EdgeInsets.only(right: 20.0),
-              child: Icon(
-                  Icons.more_vert
-              ),
-            ),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.local_pharmacy_sharp),
+            onPressed: () {},
+          ),
         ],
+        leading: IconButton(
+          icon: Icon(Icons.account_circle),
+          onPressed: () {},
+        ),
       ),
 
 
