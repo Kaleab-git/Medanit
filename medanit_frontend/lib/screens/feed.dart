@@ -12,6 +12,7 @@ class Feed extends StatefulWidget {
   @override
   _FeedState createState() => _FeedState();
 }
+
 class _FeedState extends State<Feed> {
   String username = "@segniAdeba";
   String upvote_count = "";
@@ -39,7 +40,11 @@ class _FeedState extends State<Feed> {
         context.read<PostBloc>().add(PostUpdate(post, action));
       });
     }
-  return Scaffold(
+
+    // *** fixed wrong context bug
+    // *** handeled calling PostDetail within context
+
+    return Scaffold(
       appBar: AppBar(
         backgroundColor: Color.fromRGBO(209, 117, 129, 1),
         leading: IconButton(
@@ -55,7 +60,7 @@ class _FeedState extends State<Feed> {
           ),
         ],
       ),
-  body: BlocBuilder<PostBloc, PostState>(
+      body: BlocBuilder<PostBloc, PostState>(
         builder: (_, state) {
           if (state is PostFail) {
             return Text('Error while performing operation');
@@ -150,3 +155,64 @@ class _FeedState extends State<Feed> {
                               ],
                             ),
                           )),
+                      Padding(
+                          padding: EdgeInsets.only(left: 50, right: 100),
+                          child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Row(
+                                  // *** added PostHandler for actions upvote and downvote
+                                  children: [
+                                    IconButton(
+                                      onPressed: () {
+                                        _PostUpdateHandler(
+                                            posts[idx], "upvote");
+                                      },
+                                      icon: Icon(upvote_icon),
+                                    ),
+                                    Text("${posts[idx].upvote}")
+                                  ],
+                                ),
+                                Row(
+                                  children: [
+                                    IconButton(
+                                      onPressed: () {
+                                        _PostUpdateHandler(
+                                            posts[idx], "downvote");
+                                      },
+                                      icon: Icon(downvote_icon),
+                                    ),
+                                    Text("${posts[idx].downvote}")
+                                  ],
+                                ),
+                                Row(children: [
+                                  IconButton(
+                                    onPressed: () => {print("Go to comments!")},
+                                    icon: Icon(Icons.comment_outlined),
+                                  ),
+                                  Text("${posts[idx].comments}")
+                                ])
+                              ]))
+                    ],
+                  ),
+                ),
+              ),
+            );
+          }
+
+          return CircularProgressIndicator();
+        },
+      ),
+      // floatingActionButton: FloatingActionButton(
+      //   onPressed: () => Navigator.of(context).pushNamed(
+      //     AddUpdateCourse.routeName,
+      //     arguments: CourseArgument(edit: false),
+      //   ),
+      //   child: Icon(Icons.add),
+      // ),
+    );
+  }
+}
+
+// () => Navigator.of(context)
+// .pushNamed(PostDetail.routeName, arguments: posts[idx])
