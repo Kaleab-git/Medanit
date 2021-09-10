@@ -24,7 +24,17 @@ class _FeedState extends State<Feed> {
     IconData upvote_icon = Icons.thumb_up_outlined;
     IconData downvote_icon = Icons.thumb_down_outlined;
     // *** _PostUpdateHandler function
-    
+    void _PostUpdateHandler(Post post, [action]) {
+      setState(() {
+        if (action == "upvote") {
+          upvote_icon = Icons.thumb_up_rounded;
+          downvote_icon = Icons.thumb_down_outlined;
+        } else if (action == "downvote") {
+          upvote_icon = Icons.thumb_up_outlined;
+          downvote_icon = Icons.thumb_down_rounded;
+        } else {
+          action == "";
+        }
         // added Bloc for Post update
         context.read<PostBloc>().add(PostUpdate(post, action));
       });
