@@ -1,15 +1,15 @@
-const moment = require('moment');
 const mongoose = require('mongoose');
 const debug = require('debug')('app:posts');        // set/export DEBUG=app:posts
 const express = require('express');
 
 const { Post, validatePost, validatePut } = require('../Models/post');
+const auth = require('../Middlewares/auth');
 
 const router = express.Router();
 
 
 /* GET POSTS. */
-router.get('/', async (req, res) => {
+router.get('/', auth, async (req, res) => {
     const pageSize = 10;
     const pageNumber = req.query.pageNumber;
     const searchTerm = req.query.search ? req.query.search.trim(): undefined;
@@ -46,7 +46,7 @@ router.get('/', async (req, res) => {
 
 
 /* GET POST WITH ID */
-router.get('/:id', async (req, res) => {
+router.get('/:id', auth, async (req, res) => {
 
     if(!mongoose.Types.ObjectId.isValid(req.params.id)) return res.status(404).send('Invalid Post Id!');
 
@@ -64,7 +64,7 @@ router.get('/:id', async (req, res) => {
 
 
 /* POST A NEW POST */
-router.post('/', async (req, res) => {
+router.post('/', auth, async (req, res) => {
     const { error, value } = validatePost(req.body);
     if (error) return res.status(400).send(error.message);
 
@@ -94,7 +94,7 @@ router.post('/', async (req, res) => {
 });
 
 /* PUT METHOD FOR A POST */
-router.put('/:id', async (req, res) => {
+router.put('/:id', auth, async (req, res) => {
     const id = req.params.id;
 
     if(!mongoose.Types.ObjectId.isValid(id)) return res.status(404).send('Invalid Post Id!');
@@ -155,7 +155,7 @@ router.put('/:id', async (req, res) => {
 
 
 /* DELETE METHOD FOR A POST */
-router.delete('/:id', async  (req, res) => {
+router.delete('/:id', auth, async  (req, res) => {
     const id = req.params.id;
 
     if(!mongoose.Types.ObjectId.isValid(id)) return res.status(404).send('Invalid Post Id!');

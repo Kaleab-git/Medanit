@@ -3,12 +3,14 @@ const express = require('express');
 
 const { Comment, validatePost, validatePut, validateId } = require('../Models/comment');
 const { Post } = require('../Models/post');
+const auth = require('../Middlewares/auth');
+
 
 const router = express.Router({mergeParams:true});
 
 
 /* get comments under a post */
-router.get('/', async (req, res) => {
+router.get('/', auth, async (req, res) => {
     const postId = req.params.post_id;
     const pageNumber = req.query.pageNumber;
     const pageSize = 20;
@@ -45,7 +47,7 @@ router.get('/', async (req, res) => {
 
 
 /* POST COMMENT */
-router.post('/', async (req, res) => {
+router.post('/', auth, async (req, res) => {
     const postId = req.params.post_id;
 
     const { error, result } = validatePost(req.body);
@@ -78,7 +80,7 @@ router.post('/', async (req, res) => {
 });
 
 /* PUT METHOD COMMENT */
-router.put('/:id', async (req, res) => {
+router.put('/:id', auth, async (req, res) => {
     const postId = req.params.post_id;
     const id = req.params.id;
 
@@ -120,7 +122,7 @@ router.put('/:id', async (req, res) => {
 
 
 /* DELETE COMMENT */
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', auth, async (req, res) => {
     const id = req.params.id;
     const postId = req.params.post_id;
 

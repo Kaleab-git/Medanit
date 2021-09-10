@@ -11,9 +11,16 @@ const catch404 = require('./Middlewares/catch404');
 const posts = require('./routes/posts');
 const comments = require('./routes/comments');
 const users = require('./routes/users');
+const auth = require('./routes/auth');
 
 const app = express();
 app.use(express.json());
+
+
+if(!config.get('jwtPrivateKey')){
+    console.error('FATAL ERROR: jwtPrivateKey is not set.');
+    process.exit(1);
+}
 
 
 // config
@@ -31,9 +38,10 @@ mongoose.connect(config.get('db.connection_string'), { useNewUrlParser: true, us
     .then(() => debug('Connected to MongoDB'))
     .catch(err => console.error('Could not connect to MongoDB ', err)); 
 // ROUTES
-app.use('/api/posts', posts);
-app.use('/api/posts/:post_id/comments', comments);
-app.use('/api/users', users);
+app.use('/api/v1/posts', posts);
+app.use('/api/v1/posts/:post_id/comments', comments);
+app.use('/api/v1/users', users);
+app.use('/api/v1/auth', auth);
 
 // catch 404 and forward to error handler
 catch404(app);
