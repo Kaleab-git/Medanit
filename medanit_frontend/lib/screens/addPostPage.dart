@@ -14,6 +14,7 @@ class _addPostPageState extends State<addPostPage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Color.fromRGBO(209, 117, 129, 1),
+
         leading:
         TextButton(
             style: TextButton.styleFrom(
@@ -33,7 +34,16 @@ class _addPostPageState extends State<addPostPage> {
               ),
             ),
             
+        actions: [
+          IconButton(
+            icon: Icon(Icons.local_pharmacy_sharp),
+            onPressed: () {},
+          ),
         ],
+        leading: IconButton(
+          icon: Icon(Icons.account_circle),
+          onPressed: () {},
+        ),
       ),
 
 

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import './tabroute.dart';
+import 'package:medanit_frontend/comments/screens/addCommentPage.dart';
 
 void main() {
   runApp(MyApp());
@@ -13,7 +13,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       debugShowCheckedModeBanner: false,
-      home: TabRoute(),
+      home: addCommentPage(),
     );
   }
 }
