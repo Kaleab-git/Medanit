@@ -61,7 +61,7 @@ router.post('/', auth, async (req, res) => {
         if(!post) return res.status(404).send('Post with provided Id does not exist!');
 
         let comment = new Comment({
-            user_id: req.body.user_id,
+            user_id: req.user._id,
             content: req.body.content,
             post_id: postId,
             date: new Date()
@@ -82,7 +82,10 @@ router.post('/', auth, async (req, res) => {
 /* PUT METHOD COMMENT */
 router.put('/:id', auth, async (req, res) => {
     const postId = req.params.post_id;
+    const currentUser = req.user._id.toString();
     const id = req.params.id;
+    const isAdmin = req.user.isAdmin;
+
 
     const { error, value } = validatePut(req.body);
     if (error) return res.status(400).send(error.message);
@@ -97,7 +100,8 @@ router.put('/:id', auth, async (req, res) => {
         // check if it exists first
         const oldComment = await Comment.findById(id);
         if(!oldComment) return res.status(404).send('Resource not found!');
-
+        if(oldComment.user_id.toString() !== currentUser && !isAdmin) return res.status(403).send('Forbidden action!');
+        
         let result;
 
         if(req.query.action){
@@ -125,14 +129,18 @@ router.put('/:id', auth, async (req, res) => {
 router.delete('/:id', auth, async (req, res) => {
     const id = req.params.id;
     const postId = req.params.post_id;
+    const isAdmin = req.user.isAdmin;
+    const currentUser = req.user._id.toString();
 
     if(!validateId(postId)) return res.status(404).send('Invalid Post Id!');
     if(!validateId(id)) return res.status(404).send('Invalid Comment Id!');
     
     try{
-        const result = await Comment.deleteOne( { _id: id } )
-        if(!result) res.status(404).send('Resource not found!');
-        return res.send(result);
+        const oldComment = await Comment.findById( id )
+        if(!oldComment) return res.status(404).send('Resource not found!');
+        if(oldComment.user_id.toString() !== currentUser && !isAdmin) return res.status(403).send('Forbidden action!');
+        oldComment.remove();
+        return res.send(oldComment);
     }catch(err){
         debug(err);
         return res.status(500).send("Internal server error while trying to delete comment!");

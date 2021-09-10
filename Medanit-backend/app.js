@@ -2,7 +2,6 @@ const debug = require('debug')('app:startup');  // set/export DEBUG=app:startup
 const mongoose = require('mongoose');
 const express = require('express');
 const config = require('config');
-const path = require('path');
 const morgan = require('morgan');
 
 const startupErrorHandler = require('./Middlewares/startupErrorHandlers');
@@ -55,3 +54,4 @@ app.set('port', process.env.PORT || 3000);
 const server = app.listen(app.get('port'), function () {
     debug('Express server listening on port ' + server.address().port);
 });
+

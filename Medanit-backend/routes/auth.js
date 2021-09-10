@@ -1,6 +1,4 @@
 const Joi = require('joi');
-const config = require('config');
-const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const debug = require('debug')('app:auth');        // set/export DEBUG=app:auth
 const express = require('express');
@@ -13,7 +11,7 @@ const router = express.Router();
 /* Login */
 router.post('/', async (req, res) => {
     const { error, value } = validate(req.body);
-    if (error) return res.status(400).send(error.message);
+    if(error) return res.status(400).send(error.message);
 
     
 

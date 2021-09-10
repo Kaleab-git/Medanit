@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 const config = require('config');
-
+const debug = require('debug');
 
 module.exports = function (req, res, next){
     const token = req.header('x-auth-token');
@@ -11,7 +11,6 @@ module.exports = function (req, res, next){
         req.user = decoded;
         next();
     }catch (ex){
-        debug('hi')
         res.status(400).send('Invalid token.')
     }
 

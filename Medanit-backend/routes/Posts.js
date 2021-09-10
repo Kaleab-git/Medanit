@@ -69,7 +69,7 @@ router.post('/', auth, async (req, res) => {
     if (error) return res.status(400).send(error.message);
 
     let post = new Post({
-        user_id: req.body.user_id,
+        user_id: req.user._id,
         title: req.body.title,
         content: req.body.content,
         side_effects: req.body.side_effects,
@@ -82,7 +82,7 @@ router.post('/', auth, async (req, res) => {
                 return res.status(400).send(err.message);
             }else{
                 post = await post.save();
-                return res.status(201).send({...post._doc, date: post.date});
+                return res.status(201).send({...post._doc, date: post.date, comments: post.comments.length});
             }
         });
         
@@ -96,6 +96,9 @@ router.post('/', auth, async (req, res) => {
 /* PUT METHOD FOR A POST */
 router.put('/:id', auth, async (req, res) => {
     const id = req.params.id;
+    const isAdmin = req.user.isAdmin
+    const currentUser = req.user._id.toString();
+
 
     if(!mongoose.Types.ObjectId.isValid(id)) return res.status(404).send('Invalid Post Id!');
     
@@ -108,6 +111,7 @@ router.put('/:id', auth, async (req, res) => {
     try{
         oldPost = await Post.findById(id);
         if(!oldPost) return res.status(404).send('Resource not found!');
+        if(oldPost.user_id.toString() !== currentUser && !isAdmin) return res.status(403).send('Forbidden action!');
 
         if(req.query.action){
 
@@ -118,6 +122,7 @@ router.put('/:id', auth, async (req, res) => {
 
             let newPost = {
                 user_id: oldPost.user_id,
+                username: oldPost.username,
                 title: req.body.title || oldPost.title,
                 content: req.body.content || oldPost.content,
                 side_effects: req.body.side_effects || oldPost.side_effects
@@ -157,14 +162,19 @@ router.put('/:id', auth, async (req, res) => {
 /* DELETE METHOD FOR A POST */
 router.delete('/:id', auth, async  (req, res) => {
     const id = req.params.id;
+    const currentUser = req.user._id.toString();
+    const isAdmin = req.user.isAdmin;
 
     if(!mongoose.Types.ObjectId.isValid(id)) return res.status(404).send('Invalid Post Id!');
 
 
     try{
-        const result = await Post.deleteOne( { _id: id } )
-        if(!result) res.status(404).send('Resource not found!');
-        return res.send(result);
+        let oldPost = await Post.findById(id);
+        if(!oldPost) res.status(404).send('Resource not found!');
+        if(oldPost.user_id.toString() !== currentUser && !isAdmin) return res.status(403).send('Forbidden action!');
+
+        oldPost.remove();
+        return res.send(oldPost);
     }catch(err){
         debug(err.message);
         return res.status(500).send("Internal server error while trying to delete a post!");

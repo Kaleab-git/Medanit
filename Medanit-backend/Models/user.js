@@ -1,6 +1,5 @@
 const moment = require('moment');
 const mongoose = require('mongoose');
-const { Post } = require('./post');
 const jwt = require('jsonwebtoken');
 const Joi = require('joi');
 const config = require('config');
@@ -55,10 +54,6 @@ const userSchema = new mongoose.Schema({
     birthdate: {
         type: Date,
         get: date => moment(date).format('LL')
-    },
-    posts: {
-        type: [ mongoose.Schema.Types.ObjectId ] ,
-        ref: 'Post'
     }
 });
 
@@ -87,7 +82,7 @@ function validatePost(user) {
 
 function validatePut(user) {
     const schema = Joi.object({
-        name: Joi.string().max(50).required(),
+        name: Joi.string().max(50),
         username: Joi.string().min(5).max(15).regex(/^@?(\w){1,15}$/),
         email: Joi.string().email().min(5).max(255),
         password: Joi.string().min(8).max(20),
