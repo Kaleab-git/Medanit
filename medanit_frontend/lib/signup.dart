@@ -280,21 +280,21 @@ class _LoginPageState extends State<LoginPage> {
               border: UnderlineInputBorder(), labelText: 'Enter your username'),
         ),
         SizedBox(
-          height: 20,
+          height: 15,
         ),
         TextFormField(
           decoration: const InputDecoration(
               border: UnderlineInputBorder(), labelText: 'user@gmail.com'),
         ),
         SizedBox(
-          height: 20,
+          height: 15,
         ),
         TextFormField(
           decoration: const InputDecoration(
               border: UnderlineInputBorder(), labelText: 'Phone Number'),
         ),
         SizedBox(
-          height: 20,
+          height: 15,
         ),
         TextFormField(
           obscureText: true,
