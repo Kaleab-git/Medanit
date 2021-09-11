@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 //routes
 import './Notifications/notifications.dart';
-import './Explore/explore.dart';
+import 'package:medanit_frontend/Posts/post.dart';
 
 class TabRoute extends StatefulWidget {
   static const routeName = "tab";
@@ -22,8 +22,8 @@ class _TabState extends State<TabRoute> {
   void initState() {
     _pages = [
       {
-        'page': Explore(),
-        'title': 'Explore',
+        'page': Feed(),
+        'title': 'PostList',
       },
       {
         'page': Notifications(),
