@@ -13,10 +13,9 @@ const comments = require('./routes/comments');
 const users = require('./routes/users');
 const auth = require('./routes/auth');
 
-const app = express(); 
-app.use(cors());
-app.options('*', cors());
+const app = express();
 app.use(express.json());
+app.use(cors());   
 
 
 if(!config.get('jwtPrivateKey')){

@@ -14,8 +14,12 @@ class PostRepository {
     return await dataProvider.getPosts();
   }
 
-  Future<void> updatePost(Post post) async {
-    await dataProvider.updatePost(post);
+  Future<List<Post>> getPost(String postid) async {
+    return await dataProvider.getPost(postid);
+  }
+
+  Future<void> updatePost(Post post, String? action) async {
+    await dataProvider.updatePost(post, action);
   }
 
   Future<void> deletePost(String id) async {

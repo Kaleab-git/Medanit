@@ -2,5 +2,5 @@ export 'bloc/bloc.dart';
 export 'models/models.dart';
 export 'data_provider/data_provider.dart';
 export 'repository/repository.dart';
-export 'Screens/screens.dart';
-// export 'screens/screens.dart';
+// export 'Screens/screens.dart';
+export 'screens/profilePage.dart';

@@ -110,7 +110,7 @@ router.get('/:id', auth, async (req, res) => {
             downvoteCount += post.dislikes;
         });
 
-        return res.status(200).send({ ...user._doc, upvotes: upvoteCount, downvotes: downvoteCount, posts: postCount});
+        return res.status(200).send({ ...user._doc, upvotes: upvoteCount, downvotes: downvoteCount, posts: postCount, notifications: undefined});
     }catch(err){
         debug(err.message);
         return res.status(500).send("Internal server error!");
@@ -181,20 +181,15 @@ router.delete('/', auth, async (req, res) => {
     // delete account as an admin
     if(accountID && isAdmin){
         debug('deleting account as admin...')
-        new Fawn.Task()
-            .remove('users', { _id: accountID })
-            .remove('posts', { user_id: accountID })
-            .remove('comments', { user_id: accountID })
-            .run({useMongoose: true})
-            .then( results => {
-                debug(`Results ${results}}`);
-
-                return res.status(204).send(results);
-            })
-            .catch(err => {
-                debug(err.message);
-                return res.status(500).send("Internal server error!");
-            });
+        try{
+            await User.deleteOne( {_id: accountID })
+            await Post.deleteMany( { user_id: accountID })
+            await Comment.deleteMany( {user_id: accountID })
+            return res.status(204).send('Account deleted');
+        }catch(err){
+            debug(err.message);
+            return res.status(500).send("Internal server error!");
+        };
 
     }
 
@@ -204,26 +199,14 @@ router.delete('/', auth, async (req, res) => {
         return res.status(400).send('Invalid operation!');
     }else{
         try{
-            debug('deleting account...');
-            debug(`_id:${_id}`)
-            new Fawn.Task()
-                .remove(User, { _id: _id })
-                .remove(Post, { user_id: _id })
-                .remove(Comment, { user_id: _id })
-                .run({useMongoose: true})
-                .then( results => {
-                    debug(`Results ${results}}`);
-
-                    return res.status(204).send(results);
-                })
-                .catch(err => {
-                    debug(err.message);
-                    return res.status(500).send("Internal server error!");
-                });
+            await User.deleteOne( {_id: _id })
+            await Post.deleteMany( { user_id: _id })
+            await Comment.deleteMany( {user_id: _id })
+            return res.status(204).send('Account deleted');
         }catch(err){
             debug(err.message);
             return res.status(500).send("Internal server error!");
-        }
+        };
     }
 });
 

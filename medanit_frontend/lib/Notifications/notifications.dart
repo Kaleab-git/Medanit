@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:medanit_frontend/Posts/Screens/postPage.dart';
 
 class Notifications extends StatefulWidget {
   const Notifications({Key? key}) : super(key: key);
@@ -29,31 +30,44 @@ class NotificationsState extends State<Notifications> {
               ),
             ),
             Expanded(
-              child: ListView.builder(
-                itemCount: 10,
-                itemBuilder: (ctx, index) => Container(
-                  decoration: BoxDecoration(
-                    color: Colors.grey[200],
-                    borderRadius: BorderRadius.circular(6)
-                  ),
-                  padding: EdgeInsets.symmetric(vertical: 10, horizontal: 5),
-                  margin: EdgeInsets.symmetric(vertical: 3),
-                  height: 100,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      Row(
-                        children: [
-                          CircleAvatar(
-                            radius: 3,
-                            backgroundColor: Colors.blue,
-                          ),
-                          Text("James Camry upvoted your post: Ginger for Fever")
-                        ],
-                      ),
-                      Text("just now")
-                    ],
+              child: GestureDetector(
+                onTap: () {
+                  print("IIIII HAAAAVEEE HEREEE BY BEEN TAPED");
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const PostPage()),
+                  );
+                  // setState(() {
+                  //   // Toggle light when tapped.
+                  //   // _lightIsOn = !_lightIsOn;
+                  // });
+                },
+                child: ListView.builder(
+                  itemCount: 10,
+                  itemBuilder: (ctx, index) => Container(
+                    decoration: BoxDecoration(
+                        color: Colors.grey[200],
+                        borderRadius: BorderRadius.circular(6)),
+                    padding: EdgeInsets.symmetric(vertical: 10, horizontal: 5),
+                    margin: EdgeInsets.symmetric(vertical: 3),
+                    height: 100,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        Row(
+                          children: [
+                            CircleAvatar(
+                              radius: 3,
+                              backgroundColor: Colors.blue,
+                            ),
+                            Text(
+                                "James Camry upvoted your post: Ginger for Fever")
+                          ],
+                        ),
+                        Text("just now")
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -61,7 +75,6 @@ class NotificationsState extends State<Notifications> {
           ],
         ),
       ),
-    
     );
   }
 }

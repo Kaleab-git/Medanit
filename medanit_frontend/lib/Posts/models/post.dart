@@ -1,3 +1,5 @@
+import 'dart:html';
+
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 
@@ -11,30 +13,44 @@ class Post extends Equatable {
     required this.user_id,
     required this.upvote,
     required this.downvote,
+    required this.comments,
+    required this.date,
   });
 
   final String id;
   final String title;
-  final String side_effects;
+  final List<dynamic> side_effects;
   final String description;
-  final int user_id;
+  final String user_id;
   final int upvote;
   final int downvote;
+  final int comments;
+  final String date;
 
   @override
-  List<Object> get props =>
-      [id, title, side_effects, description, user_id, upvote, downvote];
+  List<Object> get props => [
+        id,
+        title,
+        side_effects,
+        description,
+        user_id,
+        upvote,
+        downvote,
+        comments,
+        date
+      ];
 
-  factory Post.fromJson(Map<String, dynamic> json) {
+  factory Post.fromJson(Map<dynamic, dynamic> json) {
     return Post(
-      id: json['id'],
-      title: json['title'],
-      side_effects: json['side_effects'],
-      description: json['description'],
-      user_id: json['user_id'],
-      upvote: json['upvote'],
-      downvote: json['downvote'],
-    );
+        id: json['_id'],
+        title: json['title'],
+        side_effects: json['side_effects'],
+        description: json['content'],
+        user_id: json['user_id'],
+        upvote: json['likes'],
+        downvote: json['dislikes'],
+        comments: json['comments'],
+        date: json['date']);
   }
 
   @override

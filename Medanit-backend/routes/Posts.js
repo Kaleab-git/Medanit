@@ -175,6 +175,8 @@ router.delete('/:id', auth, async  (req, res) => {
     try{
         let oldPost = await Post.findById(id);
         if(!oldPost) res.status(404).send('Resource not found!');
+        debug(oldPost.user_id.toString())
+        debug(currentUser)
         if(oldPost.user_id.toString() !== currentUser && !isAdmin) return res.status(403).send('Forbidden action!');
 
         oldPost.remove();
@@ -189,7 +191,7 @@ router.delete('/:id', auth, async  (req, res) => {
 
 
 
-async function handleUpvoteDownvoteNotification(req, req) {
+async function handleUpvoteDownvoteNotification(req) {
     const action = req.query.action;
     const postId = req.params.id;
     const userId = req.user._id;
@@ -197,7 +199,7 @@ async function handleUpvoteDownvoteNotification(req, req) {
     let post = await Post.findById(postId) ;
     let user = await User.findById(post.user_id);
 
-    if(!user || !post) return res.status(400).send('Invalid id.');
+    if(!post) return res.status(400).send('Invalid id.');
 
     let notification = new Notification({
         from: userId,

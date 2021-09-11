@@ -66,20 +66,22 @@ router.post('/', auth, async (req, res) => {
         if(!post) return res.status(404).send('Post with provided Id does not exist!');
 
         let user = await User.findById(post.user_id);
-        if(!user) return res.status(400).send('Invalid id.');
+        if(!user) return res.status(400).send('Invalid id!');
 
-        let notification = new Notification({
-            from: userId,
-            trigger: "comment",
-            target: "post",
-            targetId: postId,
-            date: new Date() 
-        });
 
-        
-        debug(notification)
-        user.notifications.push(notification);
-        // await user.save();
+        if(user._id.toString() !== userId){
+            let notification = new Notification({
+                from: userId,
+                trigger: "comment",
+                target: "post",
+                targetId: postId,
+                date: new Date() 
+            });
+    
+            user.notifications.push(notification);
+            await user.save();
+        }
+
 
         let comment = new Comment({
             user_id: req.user._id,
@@ -89,9 +91,9 @@ router.post('/', auth, async (req, res) => {
         }); 
 
         post.comments.push(comment);
-        // post.save();
+        post.save();
 
-        // comment = await comment.save()
+        comment = await comment.save()
         return res.status(201).send({...comment._doc, date: comment.date});
         
     }catch(err){
@@ -181,7 +183,13 @@ async function handleUpvoteDownvoteNotification(req, res){
 
     let comment = await Comment.findById(commentId);
     let user = await User.findById(comment.user_id);
-    if(!comment) return res.status(400).send('Invalid id.');
+    if(!user) return res.status(400).send('Invalid id!');
+
+    debug(user._id)
+    debug(userId)
+
+    if(user._id.toString() === userId) return;
+
 
     let notification = new Notification({
         from: userId,
@@ -190,6 +198,8 @@ async function handleUpvoteDownvoteNotification(req, res){
         targetId: commentId,
         date: new Date() 
     });
+
+    debug(notification)
 
     if (action) {
         if (action === "upvote") {
@@ -203,7 +213,7 @@ async function handleUpvoteDownvoteNotification(req, res){
         if (action === "downvote") {
             debug(`Send a user who commented a comment(id=${commentId}) that a user(id=${userId}) has disliked his post`);
             
-            notification.trigger = "like";
+            notification.trigger = "dislike";
             user.notifications.push(notification);
             await user.save();
         }
