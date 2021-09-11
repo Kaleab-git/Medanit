@@ -1,3 +1,4 @@
 {
-  "name": "Medanit"
+  "name": "Medanit",
+  "jwtPrivateKey" : ""
 }

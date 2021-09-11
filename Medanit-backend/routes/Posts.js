@@ -1,4 +1,3 @@
-const moment = require('moment');
 const mongoose = require('mongoose');
 const debug = require('debug')('app:posts');        // set/export DEBUG=app:posts
 const express = require('express');

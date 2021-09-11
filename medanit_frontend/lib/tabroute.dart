@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 //routes
 import './Notifications/notifications.dart';
 import './Explore/explore.dart';
+import './doctor/doctor_profile.dart';
 
 class TabRoute extends StatefulWidget {
   static const routeName = "tab";
@@ -29,10 +30,10 @@ class _TabState extends State<TabRoute> {
         'page': Notifications(),
         'title': 'Notifications',
       },
-      // {
-      //   'page': Notifications(),
-      //   'title': 'Notifications',
-      // },
+      {
+        'page': Doctor(),
+        'title': 'Doctors',
+      },
       // {
       //   'page': Notifications(),
       //   'title': 'Notifications',
@@ -91,11 +92,18 @@ class _TabState extends State<TabRoute> {
           //   ),
           //   label: "Add",
           // ),
+
           BottomNavigationBarItem(
             icon: Icon(
               Icons.notifications,
             ),
             label: "Notifications",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(
+              Icons.assignment_ind_rounded,
+            ),
+            label: "Doctor",
           ),
         ],
       ),
