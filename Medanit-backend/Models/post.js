@@ -65,7 +65,6 @@ const Post = mongoose.model('Post', new mongoose.Schema({
 function validatePost(post) {
 
     const schema = Joi.object({
-        user_id: Joi.objectId().required(),
         title: Joi.string().min(2).max(70).required(),
         content: Joi.string().min(100).max(1000).required(),
         side_effects: Joi.array().required().min(0)
@@ -78,7 +77,6 @@ function validatePost(post) {
 function validatePut(post) {
 
     const schema = Joi.object({
-        user_id: Joi.objectId().required(),
         title: Joi.string().min(2).max(70),
         content: Joi.string().min(100).max(1000),
         side_effects: Joi.array().min(0)

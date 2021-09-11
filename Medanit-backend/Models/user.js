@@ -1,6 +1,8 @@
 const moment = require('moment');
 const mongoose = require('mongoose');
+const jwt = require('jsonwebtoken');
 const Joi = require('joi');
+const config = require('config');
 Joi.objectId = require('joi-objectid')(Joi);
 
 const userSchema = new mongoose.Schema({
@@ -52,11 +54,28 @@ const userSchema = new mongoose.Schema({
     birthdate: {
         type: Date,
         get: date => moment(date).format('LL')
-    } 
+    },
+    
+    likedPosts: {
+        type: [ mongoose.Schema.Types.ObjectId ]
+    },
+
+    dislikedPosts: {
+        type: [ mongoose.Schema.Types.ObjectId ]
+    },
+
+    likedComments: {
+        type: [ mongoose.Schema.Types.ObjectId ]
+    },
+
+    dislikedComments: {
+        type: [ mongoose.Schema.Types.ObjectId ]
+    }
 });
 
 userSchema.methods.generateAuthToken = function(){
-    return jwt.sign({ _id: this._id, isAdmin: this.isAdmin } , config.get('jwtPrivateKey'));
+    const payload = { _id: this._id, isAdmin: this.isAdmin };
+    return jwt.sign(payload , config.get('jwtPrivateKey'));
 }
 
 const User = mongoose.model('User', userSchema);
@@ -79,7 +98,7 @@ function validatePost(user) {
 
 function validatePut(user) {
     const schema = Joi.object({
-        name: Joi.string().max(50).required(),
+        name: Joi.string().max(50),
         username: Joi.string().min(5).max(15).regex(/^@?(\w){1,15}$/),
         email: Joi.string().email().min(5).max(255),
         password: Joi.string().min(8).max(20),

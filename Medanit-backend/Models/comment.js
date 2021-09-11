@@ -43,7 +43,6 @@ const Comment = mongoose.model('Comment', new mongoose.Schema({
 
 function validatePost(comment) {
     const schema = Joi.object({
-        user_id: Joi.objectId().required(),
         content: Joi.string().min(1).max(1000).required()
     });
 
@@ -52,7 +51,6 @@ function validatePost(comment) {
 
 function validatePut(comment) {
     const schema = Joi.object({
-        user_id: Joi.objectId().required(),
         content: Joi.string().min(1).max(1000)
     });
     return schema.validate(comment);
