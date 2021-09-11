@@ -75,7 +75,7 @@ class _postDetailState extends State<PostDetail> {
         backgroundColor: Color.fromRGBO(209, 117, 129, 1),
         leading: IconButton(
           onPressed: () {
-            Navigator.popAndPushNamed(context, '/feed');
+            Navigator.pop(context);
           },
           icon: Icon(Icons.arrow_back),
         ),

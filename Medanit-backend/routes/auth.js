@@ -11,20 +11,19 @@ const router = express.Router();
 /* Login */
 router.post('/', async (req, res) => {
     const { error, value } = validate(req.body);
-    if(error) return res.status(400).send(error.message);
+    if(error) return res.status(400).send({message: error.message});
 
     
     try{
-        
         let user = await User.findOne( { username: value.username } )
-        if(!user) return res.status(400).send('Invalid username or password.');
+        if(!user) return res.status(400).json({message: "Invalid username or password.", token: ""});
         
         const validPassword = await bcrypt.compare(req.body.password, user.password);
-        if(!validPassword) return res.status(400).send('Invalid username or password.');
+        if(!validPassword) return res.status(400).json({message: "Invalid username or password.", token: ""});
         
         const token = user.generateAuthToken();
         
-        return res.send(token);
+        return res.json({message: "Success", token: token});
         
         
     }catch(err){

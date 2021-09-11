@@ -5,6 +5,7 @@ import 'package:medanit_frontend/Posts/Screens/postPage.dart';
 import 'package:medanit_frontend/User/screens/profilePage.dart';
 import 'package:medanit_frontend/Posts/post.dart';
 import 'package:medanit_frontend/comments/comment.dart';
+import '../../globals.dart' as globals;
 
 class Feed extends StatefulWidget {
   static const routeName = '/feed';
@@ -45,21 +46,6 @@ class _FeedState extends State<Feed> {
     // *** handeled calling PostDetail within context
 
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Color.fromRGBO(209, 117, 129, 1),
-        leading: IconButton(
-          onPressed: () {
-            Navigator.pushNamed(context, Doctor.routeName);
-          },
-          icon: Icon(Icons.person),
-        ),
-        actions: <Widget>[
-          Padding(
-            padding: EdgeInsets.only(right: 20.0),
-            child: Icon(Icons.more_vert),
-          ),
-        ],
-      ),
       body: BlocBuilder<PostBloc, PostState>(
         builder: (_, state) {
           if (state is PostFail) {
@@ -88,7 +74,7 @@ class _FeedState extends State<Feed> {
                                     mainAxisAlignment: MainAxisAlignment.start,
                                     children: [
                                       Text(
-                                        'Segni A',
+                                        '${globals.user.name}',
                                         style: TextStyle(
                                           fontWeight: FontWeight.bold,
                                           color: Colors.black,
@@ -98,7 +84,7 @@ class _FeedState extends State<Feed> {
                                       RichText(
                                           text: TextSpan(children: <TextSpan>[
                                         TextSpan(
-                                          text: '@segniAdeba',
+                                          text: '@${globals.user.username}',
                                           style: TextStyle(color: Colors.blue),
                                         ),
                                         TextSpan(
@@ -202,18 +188,12 @@ class _FeedState extends State<Feed> {
                 ),
               ),
             );
+          } else {
+            // context.read<PostBloc>().add(PostLoad());
+            return CircularProgressIndicator();
           }
-
-          return CircularProgressIndicator();
         },
       ),
-      // floatingActionButton: FloatingActionButton(
-      //   onPressed: () => Navigator.of(context).pushNamed(
-      //     AddUpdateCourse.routeName,
-      //     arguments: CourseArgument(edit: false),
-      //   ),
-      //   child: Icon(Icons.add),
-      // ),
     );
   }
 }

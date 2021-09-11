@@ -2,6 +2,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medanit_frontend/User/user.dart';
 import 'package:medanit_frontend/User/bloc/bloc.dart';
+import 'package:medanit_frontend/globals.dart';
 
 class UserBloc extends Bloc<UserEvent, UserState> {
   final UserRepository userRepository;
@@ -10,42 +11,37 @@ class UserBloc extends Bloc<UserEvent, UserState> {
 
   @override
   Stream<UserState> mapEventToState(UserEvent event) async* {
-    if (event is UserPostLoad) {
-      yield UserLoading();
+    if (event is UserInfoLoad) {
+      // yield UserLoading();
       try {
         final posts = await userRepository.userPosts(event.user_id);
-        yield UserPostsLoadSuccess(posts);
+        final user = await userRepository.usersInfo();
+        yield UserInfoLoadSuccess(user, posts);
       } catch (err) {
         print(err.toString());
         yield UserFail();
       }
     }
 
-    // if (event is GetPost) {
+    // if (event is UserPostLoad) {
+    //   yield UserLoading();
     //   try {
-    //     // final post = await postRepository.getPost(event.postid);
-    //     final posts = await postRepository.getPosts();
-    //     for (int i = 0; i < posts.length; i++) {
-    //       if (posts[i].id == event.postid) {
-    //         posts.add(posts[i]);
-    //         break;
-    //       }
-    //     }
-    //     yield PostsLoadSuccess(posts);
+    //     final posts = await userRepository.userPosts(event.user_id);
+    //     yield UserPostsLoadSuccess(posts);
     //   } catch (err) {
     //     print(err.toString());
-    //     yield PostFail();
+    //     yield UserFail();
     //   }
     // }
 
-    if (event is LoadUserInfo) {
-      try {
-        final user = await userRepository.usersInfo();
-        yield UserInfoLoadSuccess(user);
-      } catch (_) {
-        yield UserFail();
-      }
-    }
+    // if (event is LoadUserInfo) {
+    //   try {
+    //     final user = await userRepository.usersInfo();
+    //     yield UserInfoLoadSuccess(user);
+    //   } catch (_) {
+    //     yield UserFail();
+    //   }
+    // }
 
     if (event is UserUpdate) {
       try {
@@ -59,10 +55,23 @@ class UserBloc extends Bloc<UserEvent, UserState> {
 
     if (event is UserDelete) {
       try {
-        await userRepository.deletePost();
+        // await userRepository.deletePost();
         yield UserAccountdeleteSuccess();
       } catch (_) {
         yield UserFail();
+      }
+    }
+
+    if (event is UserPostDelete) {
+      try {
+        await userRepository.deletePost(event.post.id);
+
+        final posts = await userRepository.userPosts(event.user.id);
+        final user = await userRepository.usersInfo();
+        print("------------------> from bloc => ${posts.length}");
+        yield UserInfoLoadSuccess(user, posts);
+      } catch (err) {
+        print(err);
       }
     }
   }

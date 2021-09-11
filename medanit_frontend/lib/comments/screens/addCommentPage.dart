@@ -40,7 +40,7 @@ class _addCommentPageState extends State<addCommentPage> {
         ],
         leading: IconButton(
           onPressed: () {
-            Navigator.popAndPushNamed(context, '/');
+            Navigator.pop(context);
           },
           icon: Icon(Icons.arrow_back),
         ),
@@ -121,7 +121,7 @@ class _addCommentPageState extends State<addCommentPage> {
                   children: [
                     Builder(
                       builder: (context) => ButtonWidget(
-                        text: 'Submit',
+                        text: 'Comment',
                         onClicked: () {
                           final isValid = formKey.currentState!.validate();
                           // FocusScope.of(context).unfocus();
@@ -132,7 +132,7 @@ class _addCommentPageState extends State<addCommentPage> {
                             context
                                 .read<CommentsBloc>()
                                 .add(CommentsCreate(text, this.widget.post_id));
-                            Navigator.popAndPushNamed(context, '/');
+                            Navigator.pop(context);
                           }
                         },
                       ),
@@ -143,19 +143,6 @@ class _addCommentPageState extends State<addCommentPage> {
             ),
           );
         },
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Color.fromRGBO(209, 117, 129, 1),
-        type: BottomNavigationBarType.fixed,
-        showSelectedLabels: false,
-        showUnselectedLabels: false,
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'home'),
-          BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search'),
-          BottomNavigationBarItem(icon: Icon(Icons.add), label: 'add'),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.notifications), label: 'notifications'),
-        ],
       ),
     );
   }

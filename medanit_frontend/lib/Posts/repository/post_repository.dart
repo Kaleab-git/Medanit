@@ -6,7 +6,7 @@ class PostRepository {
 
   PostRepository({required this.dataProvider});
 
-  Future<Post> createPost(Post post) async {
+  Future<Map> createPost(Map post) async {
     return await dataProvider.createPost(post);
   }
 

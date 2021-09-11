@@ -8,12 +8,11 @@ import '../../globals.dart' as globals;
 class CommentDataProvider {
   final _baseUrl = 'http://localhost:3000/api/v1';
   final http.Client httpClient;
-  final token = globals.storage.getItem('token');
-  // final token =
-  //     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MTNiYzM5ZmIxNjc2MmU1MDAzY2MwYzciLCJpc0FkbWluIjpmYWxzZSwiaWF0IjoxNjMxMzYyMDkyfQ.m4-mTHIeg9pMB4HIOZmTni3rintpHRQSBqeQ9gY88jk";
+  // final token = globals.storage.getItem('token');
   CommentDataProvider({required this.httpClient});
 
   Future<Comments> createComment(String text, String post_id) async {
+    String token = globals.token;
     final response = await httpClient.post(
       Uri.parse('$_baseUrl/posts/${post_id}/comments'),
       headers: <String, String>{
@@ -34,6 +33,7 @@ class CommentDataProvider {
 
 // $_baseUrl/api/posts
   Future<List<Comments>> getComments(String post_id) async {
+    String token = globals.token;
     final response = await httpClient
         .get(Uri.parse('$_baseUrl/posts/${post_id}/comments'), headers: {
       "x-auth-token": token,
@@ -49,6 +49,7 @@ class CommentDataProvider {
   }
 
   Future<void> deleteComment(Comments comment) async {
+    String token = globals.token;
     final http.Response response = await httpClient.delete(
       Uri.parse('$_baseUrl/posts/${comment.post_id}/comments/${comment.id}'),
       headers: <String, String>{
@@ -63,6 +64,7 @@ class CommentDataProvider {
   }
 
   Future<void> updateComment(Comments comment, String action) async {
+    String token = globals.token;
     final http.Response response = await httpClient.put(
       Uri.parse(
           '$_baseUrl/posts/${comment.post_id}/comments/${comment.id}?action=${action}'),

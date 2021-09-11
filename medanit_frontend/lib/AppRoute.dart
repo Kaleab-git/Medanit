@@ -5,6 +5,7 @@ import 'package:medanit_frontend/comments/screens/addCommentPage.dart';
 import 'package:medanit_frontend/screens/SignUp.dart';
 import 'package:medanit_frontend/screens/SignIn.dart';
 import 'package:medanit_frontend/screens/addPostPage.dart';
+import 'package:medanit_frontend/screens/homePage.dart';
 
 class PostAppRoute {
   static Route generateRoute(RouteSettings settings) {
@@ -36,6 +37,9 @@ class PostAppRoute {
       return MaterialPageRoute(
           builder: (context) => addCommentPage(
               prev_comment: args.prev_comment, post_id: args.post_id));
+    }
+    if (settings.name == HomePageScreen.routeName) {
+      return MaterialPageRoute(builder: (context) => HomePageScreen());
     }
 
     return MaterialPageRoute(builder: (context) => SignInScreen());

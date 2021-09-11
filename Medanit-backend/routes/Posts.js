@@ -66,11 +66,12 @@ router.get('/:id', auth, async (req, res) => {
 });
 
 
-/* POST A NEW POST */
+/* POST A NEW POST ... lol that naming */
 router.post('/', auth, async (req, res) => {
     const { error, value } = validatePost(req.body);
-    if (error) return res.status(400).send(error.message);
-
+    console.log("error when validating ======================================", error)
+    if (error) return res.status(400).json({message: error.message, status: "failure"});
+//{message: ""}
     let post = new Post({
         user_id: req.user._id,
         title: req.body.title,
@@ -82,17 +83,20 @@ router.post('/', auth, async (req, res) => {
     try{
         post.validate(async (err) => {
             if(err){
-                return res.status(400).send(err.message);
+                console.log("error on post.validate ======================================", error);
+                return res.status(400).send({message: err.message, status: "failure"});
             }else{
                 post = await post.save();
-                return res.status(201).send({...post._doc, date: post.date, comments: post.comments.length});
+                // really sorry about commenting this out as well. 
+                // return res.status(201).send({...post._doc, date: post.date, comments: post.comments.length});
+                return res.status(201).json({message: "Post successfully created!", status: "success"}) 
             }
         });
         
         
     }catch(err){
         debug(err.message);
-        return res.status(500).send("Internal server error while trying to create a new post!");
+        return res.status(500).json({message: "Internal server error while trying to create a new post!", status: "failure"});
     }
 });
 
@@ -155,6 +159,7 @@ router.put('/:id', auth, async (req, res) => {
 
     }catch(err){
         debug(err.message);
+        console.log(err.message)
         res.status(500).send("Internal server error while trying to edit a post!");
 
     }
@@ -169,21 +174,21 @@ router.delete('/:id', auth, async  (req, res) => {
     const currentUser = req.user._id.toString();
     const isAdmin = req.user.isAdmin;
 
-    if(!mongoose.Types.ObjectId.isValid(id)) return res.status(404).send('Invalid Post Id!');
+    if(!mongoose.Types.ObjectId.isValid(id)) return res.status(404).json({message:'Invalid Post Id!'});
 
 
     try{
         let oldPost = await Post.findById(id);
-        if(!oldPost) res.status(404).send('Resource not found!');
+        if(!oldPost) res.status(404).json({message:'Resource not found!'});
         debug(oldPost.user_id.toString())
         debug(currentUser)
-        if(oldPost.user_id.toString() !== currentUser && !isAdmin) return res.status(403).send('Forbidden action!');
+        if(oldPost.user_id.toString() !== currentUser && !isAdmin) return res.status(403).json({message:'Forbidden action!'});
 
         oldPost.remove();
-        return res.send(oldPost);
+        return res.json({message:"Post Successsfully deleted!"});
     }catch(err){
         debug(err.message);
-        return res.status(500).send("Internal server error while trying to delete a post!");
+        return res.status(500).json({message:"Internal server error while trying to delete a post!"});
 
     }
 });

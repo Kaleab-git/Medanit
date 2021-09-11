@@ -19,4 +19,13 @@ class PostsLoadSuccess extends PostState {
   List<Object> get props => [posts];
 }
 
+class PostCreateScuccess extends PostState {
+  final Map message;
+
+  PostCreateScuccess(this.message);
+
+  @override
+  List<Object> get props => [];
+}
+
 class PostFail extends PostState {}

@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:medanit_frontend/Posts/post.dart';
+import 'package:medanit_frontend/User/user.dart';
 
 abstract class PostEvent extends Equatable {
   const PostEvent();
@@ -21,7 +22,7 @@ class GetPost extends PostEvent {
 }
 
 class PostCreate extends PostEvent {
-  final Post post;
+  final Map post;
 
   const PostCreate(this.post);
 
@@ -54,5 +55,5 @@ class PostDelete extends PostEvent {
   List<Object> get props => [post];
 
   @override
-  toString() => 'Course Deleted. Post: $post';
+  toString() => 'Post Deleted. Post: $post';
 }

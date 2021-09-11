@@ -22,18 +22,18 @@ Fawn.init(`mongodb://localhost:27017/Medanit`);
 router.post('/', async (req, res) => {
     const { error, value } = validatePost(req.body);
     let result;
-    if (error) return res.status(400).send(error.message);
+    if (error) return res.status(400).send({message: error.message});
 
     
 
     try{
 
         let user = await User.findOne( { email: value.email } );
-        if(user) return res.status(400).send('Email already taken.');
-
+        if(user) return res.status(400).json({message: "Email already exists"});
+            
         user = await User.findOne( { username: value.username } );
-        if(user) return res.status(400).send('Username already taken.');
-
+        if(user) return res.status(400).json({message: "Username already exists."});
+        
 
         user = new User({
             ...value,
@@ -43,7 +43,7 @@ router.post('/', async (req, res) => {
 
         user.validate(async (err) => {
             if(err){
-                return res.status(400).send(err.message);
+                return res.status(400).json({message: err.message});
             }else{  
                 try{
                     const salt = await bcrypt.genSalt(10);
@@ -51,8 +51,11 @@ router.post('/', async (req, res) => {
                     result = await user.save();
                     
                     const token = user.generateAuthToken();
+                    
+                    // reallly sorry for changing this part of your code. It was really cool. I just needed more info
+                    // return res.header('x-auth-token', token).status(201).send(_.pick(result, ['_id', 'name', 'username', 'email']));
 
-                    return res.header('x-auth-token', token).status(201).send(_.pick(result, ['_id', 'name', 'username', 'email']));
+                    return res.header('x-auth-token', token).status(201).json({message:"success"});
                 }catch(err){
                     debug(err);
                     return res.status(500).send("Internal server error while trying to create a new post!");

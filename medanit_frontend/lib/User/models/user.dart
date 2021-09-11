@@ -10,22 +10,26 @@ class User extends Equatable {
     required this.name,
     required this.username,
     required this.email,
-    required this.profile_pic_url,
+    // required this.profile_pic_url,
     required this.password,
-    required this.werified,
+    required this.verified,
     required this.isAdmin,
-    required this.bio,
+    required this.posts,
+    required this.upvotes,
+    required this.downvotes,
   });
 
   final String id;
   final String name;
   final String username;
   final String email;
-  final String profile_pic_url;
+  // final String profile_pic_url;
   final String password;
-  final bool werified;
+  final bool verified;
   final bool isAdmin;
-  final String bio;
+  final int posts;
+  final int upvotes;
+  final int downvotes;
 
   @override
   List<Object> get props => [
@@ -33,11 +37,13 @@ class User extends Equatable {
         name,
         username,
         email,
-        profile_pic_url,
+        // profile_pic_url,
         password,
-        werified,
+        verified,
         isAdmin,
-        bio
+        posts,
+        upvotes,
+        downvotes,
       ];
 
   factory User.fromJson(Map<dynamic, dynamic> json) {
@@ -46,11 +52,13 @@ class User extends Equatable {
         name: json['name'],
         username: json['username'],
         email: json['email'],
-        profile_pic_url: json['profile_pic_url'],
+        // profile_pic_url: json['profile_pic_url'],
         password: json['password'],
-        werified: json['werified'],
+        verified: json['verified'],
         isAdmin: json['isAdmin'],
-        bio: json['bio']);
+        posts: json['posts'],
+        upvotes: json['upvotes'],
+        downvotes: json['downvotes']);
   }
 
   @override

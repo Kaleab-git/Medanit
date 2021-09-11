@@ -23,7 +23,7 @@ class UserRepository {
     await dataProvider.updateUser(user);
   }
 
-  Future<void> deletePost() async {
-    await dataProvider.deletePost();
+  Future<void> deletePost(String post_id) async {
+    await dataProvider.deletePost(post_id);
   }
 }

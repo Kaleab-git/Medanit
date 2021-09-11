@@ -5,6 +5,7 @@ import 'package:medanit_frontend/Posts/post.dart';
 import 'package:medanit_frontend/comments/comment.dart';
 import 'package:flutter/gestures.dart';
 import 'package:medanit_frontend/User/user.dart';
+import '../../globals.dart' as globals;
 
 class Doctor extends StatefulWidget {
   static const routeName = 'doctor';
@@ -22,162 +23,153 @@ class DoctorState extends State<Doctor> {
     IconData upvote_icon = Icons.thumb_up_outlined;
     IconData downvote_icon = Icons.thumb_down_outlined;
 
-    void _PostUpdateHandler(Post post, [action]) {
-      setState(() {
-        if (action == "upvote") {
-          upvote_icon = Icons.thumb_up_rounded;
-          downvote_icon = Icons.thumb_down_outlined;
-        } else if (action == "downvote") {
-          upvote_icon = Icons.thumb_up_outlined;
-          downvote_icon = Icons.thumb_down_rounded;
-        } else {
-          action == "";
-        }
-        context.read<PostBloc>().add(PostUpdate(post, action));
-        context.read<PostBloc>().add(GetPost(post.id));
-      });
+    void _PostDeleteHandler(Post post, User user) {
+      // setState(() {
+      context.read<UserBloc>().add(UserPostDelete(post, user));
+      // });
     }
 
     return Scaffold(
       body: BlocBuilder<UserBloc, UserState>(builder: (_, state) {
-        return Container(
-          child: Column(
-            children: <Widget>[
-              IconButton(
-                onPressed: () {
-                  Navigator.popAndPushNamed(context, '/feed');
-                },
-                icon: Icon(Icons.arrow_back),
-              ),
-              Container(
-                  decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [Colors.redAccent, Colors.pinkAccent])),
-                  child: Container(
-                    width: double.infinity,
-                    height: 350.0,
-                    child: Center(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          CircleAvatar(
-                            // backgroundImage: NetworkImage(
-                            //   "assets/img/profile.png",
-                            // ),
-                            radius: 50.0,
-                          ),
-                          SizedBox(
-                            height: 10.0,
-                          ),
-                          Text(
-                            "Dr John",
-                            style: TextStyle(
-                              fontSize: 22.0,
-                              color: Colors.white,
+        if (state is UserInfoLoadSuccess) {
+          print(
+              "Yeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeet state: ${state.posts.length}");
+          return Container(
+            child: Column(
+              children: <Widget>[
+                IconButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  icon: Icon(Icons.arrow_back),
+                ),
+                Container(
+                    decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [Colors.redAccent, Colors.pinkAccent])),
+                    child: Container(
+                      width: double.infinity,
+                      height: 350.0,
+                      child: Center(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            CircleAvatar(
+                              // backgroundImage: NetworkImage(
+                              //   "assets/img/profile.png",
+                              // ),
+                              radius: 50.0,
                             ),
-                          ),
-                          SizedBox(
-                            height: 10.0,
-                          ),
-                          Card(
-                            margin: EdgeInsets.symmetric(
-                                horizontal: 20.0, vertical: 5.0),
-                            clipBehavior: Clip.antiAlias,
-                            color: Colors.white,
-                            elevation: 5.0,
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 8.0, vertical: 22.0),
-                              child: Row(
-                                children: <Widget>[
-                                  Expanded(
-                                    child: Column(
-                                      children: <Widget>[
-                                        Text(
-                                          "Posts",
-                                          style: TextStyle(
-                                            color: Colors.redAccent,
-                                            fontSize: 22.0,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                        SizedBox(
-                                          height: 5.0,
-                                        ),
-                                        Text(
-                                          "5200",
-                                          style: TextStyle(
-                                            fontSize: 20.0,
-                                            color: Colors.pinkAccent,
-                                          ),
-                                        )
-                                      ],
-                                    ),
-                                  ),
-                                  Expanded(
-                                    child: Column(
-                                      children: <Widget>[
-                                        Text(
-                                          "Upvotes",
-                                          style: TextStyle(
-                                            color: Colors.redAccent,
-                                            fontSize: 22.0,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                        SizedBox(
-                                          height: 5.0,
-                                        ),
-                                        Text(
-                                          "28.5K",
-                                          style: TextStyle(
-                                            fontSize: 20.0,
-                                            color: Colors.pinkAccent,
-                                          ),
-                                        )
-                                      ],
-                                    ),
-                                  ),
-                                  Expanded(
-                                    child: Column(
-                                      children: <Widget>[
-                                        Text(
-                                          "Downvotes",
-                                          style: TextStyle(
-                                            color: Colors.redAccent,
-                                            fontSize: 22.0,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                        SizedBox(
-                                          height: 5.0,
-                                        ),
-                                        Text(
-                                          "1300",
-                                          style: TextStyle(
-                                            fontSize: 20.0,
-                                            color: Colors.pinkAccent,
-                                          ),
-                                        )
-                                      ],
-                                    ),
-                                  ),
-                                ],
+                            SizedBox(
+                              height: 10.0,
+                            ),
+                            Text(
+                              "${state.user.name}",
+                              style: TextStyle(
+                                fontSize: 22.0,
+                                color: Colors.white,
                               ),
                             ),
-                          )
-                        ],
+                            SizedBox(
+                              height: 10.0,
+                            ),
+                            Card(
+                              margin: EdgeInsets.symmetric(
+                                  horizontal: 20.0, vertical: 5.0),
+                              clipBehavior: Clip.antiAlias,
+                              color: Colors.white,
+                              elevation: 5.0,
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 8.0, vertical: 22.0),
+                                child: Row(
+                                  children: <Widget>[
+                                    Expanded(
+                                      child: Column(
+                                        children: <Widget>[
+                                          Text(
+                                            "Posts",
+                                            style: TextStyle(
+                                              color: Colors.redAccent,
+                                              fontSize: 22.0,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          SizedBox(
+                                            height: 5.0,
+                                          ),
+                                          Text(
+                                            "${state.user.posts}",
+                                            style: TextStyle(
+                                              fontSize: 20.0,
+                                              color: Colors.pinkAccent,
+                                            ),
+                                          )
+                                        ],
+                                      ),
+                                    ),
+                                    Expanded(
+                                      child: Column(
+                                        children: <Widget>[
+                                          Text(
+                                            "Upvotes",
+                                            style: TextStyle(
+                                              color: Colors.redAccent,
+                                              fontSize: 22.0,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          SizedBox(
+                                            height: 5.0,
+                                          ),
+                                          Text(
+                                            "${state.user.upvotes}",
+                                            style: TextStyle(
+                                              fontSize: 20.0,
+                                              color: Colors.pinkAccent,
+                                            ),
+                                          )
+                                        ],
+                                      ),
+                                    ),
+                                    Expanded(
+                                      child: Column(
+                                        children: <Widget>[
+                                          Text(
+                                            "Downvotes",
+                                            style: TextStyle(
+                                              color: Colors.redAccent,
+                                              fontSize: 22.0,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          SizedBox(
+                                            height: 5.0,
+                                          ),
+                                          Text(
+                                            "${state.user.downvotes}",
+                                            style: TextStyle(
+                                              fontSize: 20.0,
+                                              color: Colors.pinkAccent,
+                                            ),
+                                          )
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            )
+                          ],
+                        ),
                       ),
-                    ),
-                  )),
-              BlocBuilder<PostBloc, PostState>(builder: (_, state) {
-                if (state is PostsLoadSuccess) {
-                  return Expanded(
-                      child: ListView.builder(
-                    itemCount: 3,
+                    )),
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: state.posts.length,
                     itemBuilder: (_, idx) => ListTile(
                       subtitle: Container(
                         child: Column(
@@ -228,6 +220,14 @@ class DoctorState extends State<Doctor> {
                                     ],
                                   ),
                                 ),
+                                Padding(
+                                    padding: EdgeInsets.only(right: 15),
+                                    child: IconButton(
+                                        onPressed: () {
+                                          _PostDeleteHandler(
+                                              state.posts[idx], state.user);
+                                        },
+                                        icon: Icon(Icons.delete_sharp)))
                               ],
                             ),
                             Padding(
@@ -238,11 +238,30 @@ class DoctorState extends State<Doctor> {
                                   text: TextSpan(
                                     children: <TextSpan>[
                                       TextSpan(
-                                        text: '${state.posts[idx].description}',
-                                        style: TextStyle(
-                                          color: Colors.black,
-                                        ),
-                                      ),
+                                          text: '${state.posts[idx].title} \n',
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.black),
+                                          recognizer: TapGestureRecognizer()
+                                            ..onTap = () {
+                                              Navigator.of(context).pushNamed(
+                                                  PostDetail.routeName,
+                                                  arguments:
+                                                      state.posts[idx].id);
+                                            }),
+                                      TextSpan(
+                                          text:
+                                              '${state.posts[idx].description}',
+                                          style: TextStyle(
+                                            color: Colors.black,
+                                          ),
+                                          recognizer: TapGestureRecognizer()
+                                            ..onTap = () {
+                                              Navigator.of(context).pushNamed(
+                                                  PostDetail.routeName,
+                                                  arguments:
+                                                      state.posts[idx].id);
+                                            }),
                                     ],
                                   ),
                                 )),
@@ -256,10 +275,7 @@ class DoctorState extends State<Doctor> {
                                     // *** added PostHandler for actions upvote and downvote
                                     children: [
                                       IconButton(
-                                        onPressed: () {
-                                          _PostUpdateHandler(
-                                              state.posts[idx], "upvote");
-                                        },
+                                        onPressed: () {},
                                         icon: Icon(upvote_icon),
                                       ),
                                       Text("${state.posts[idx].upvote}")
@@ -268,10 +284,7 @@ class DoctorState extends State<Doctor> {
                                   Row(
                                     children: [
                                       IconButton(
-                                        onPressed: () {
-                                          _PostUpdateHandler(
-                                              state.posts[idx], "downvote");
-                                        },
+                                        onPressed: () {},
                                         icon: Icon(downvote_icon),
                                       ),
                                       Text("${state.posts[idx].downvote}")
@@ -284,14 +297,18 @@ class DoctorState extends State<Doctor> {
                         ),
                       ),
                     ),
-                  ));
-                }
-                return Text(
-                    "Something might have gone wrong! Lets wait and see");
-              }),
-            ],
-          ),
-        );
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+        if (state is UserLoading) {
+          print(
+              "-----------------------I shouuuuld not have gotten executed-----------------------");
+          context.read<UserBloc>().add(UserInfoLoad("${globals.user.id}"));
+        }
+        return Text("$state");
       }),
     );
   }

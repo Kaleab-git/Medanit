@@ -9,34 +9,34 @@ class PostDataProvider {
   final _baseUrl = 'http://localhost:3000/api/v1';
   final http.Client httpClient;
   // final token = globals.storage.getItem('token');
-  final token =
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MTNiYzM5ZmIxNjc2MmU1MDAzY2MwYzciLCJpc0FkbWluIjpmYWxzZSwiaWF0IjoxNjMxMzYyMDkyfQ.m4-mTHIeg9pMB4HIOZmTni3rintpHRQSBqeQ9gY88jk";
+
   PostDataProvider({required this.httpClient});
 
-  Future<Post> createPost(Post course) async {
+  Future<Map> createPost(Map post) async {
+    String token = globals.token;
     final response = await httpClient.post(
-      Uri.http('192.168.56.1:3000', '/posts'),
+      Uri.parse('$_baseUrl/posts'),
       headers: <String, String>{
         "x-auth-token": token,
         'Content-Type': 'application/json; charset=UTF-8',
       },
       body: jsonEncode(<String, dynamic>{
-        'title': course.title,
-        'side_effects': course.side_effects,
-        'description': course.description,
-        'user_id': course.user_id,
+        'title': post["title"].toString(),
+        'side_effects': post["side_effects"],
+        'content': post["content"].toString(),
       }),
     );
-
-    if (response.statusCode == 200) {
-      return Post.fromJson(jsonDecode(response.body));
-    } else {
+    try {
+      return jsonDecode(response.body);
+    } catch (_) {
       throw Exception('Create Post Failed');
     }
   }
 
 // $_baseUrl/api/posts
   Future<List<Post>> getPosts() async {
+    String token = globals.token;
+
     final response =
         await httpClient.get(Uri.parse('$_baseUrl/posts'), headers: {
       "x-auth-token": token,
@@ -54,6 +54,8 @@ class PostDataProvider {
 
 // $_baseUrl/api/posts
   Future<List<Post>> getPost(String id) async {
+    String token = globals.token;
+
     final response = await httpClient.get(Uri.parse('$_baseUrl/posts/$id'),
         headers: {"x-auth-token": token, "Access-Control-Allow-Origin": "*"});
     if (response.statusCode == 200) {
@@ -65,11 +67,12 @@ class PostDataProvider {
   }
 
   Future<void> deletePost(String id) async {
+    String token = globals.token;
+
     final http.Response response = await httpClient.delete(
       Uri.parse('$_baseUrl/posts/$id'),
-      headers: <String, String>{
+      headers: {
         "x-auth-token": token,
-        'Content-Type': 'application/json; charset=UTF-8',
       },
     );
 
@@ -79,6 +82,8 @@ class PostDataProvider {
   }
 
   Future<void> updatePost(Post post, String? action) async {
+    String token = globals.token;
+
     final http.Response response = await httpClient.put(
       Uri.parse('$_baseUrl/posts/${post.id}?action=$action'),
       headers: <String, String>{
@@ -92,7 +97,6 @@ class PostDataProvider {
       //   'content': post.description,
       // }),
     );
-
     if (response.statusCode != 204) {
       throw Exception('Update Post Failed');
     }

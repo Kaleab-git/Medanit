@@ -11,20 +11,29 @@ class UserState extends Equatable {
 
 class UserLoading extends UserState {}
 
-class UserPostsLoadSuccess extends UserState {
+class UserInfoLoadSuccess extends UserState {
   final List<Post> posts;
+  final User user;
 
-  UserPostsLoadSuccess([this.posts = const []]);
+  UserInfoLoadSuccess(this.user, [this.posts = const []]);
 
   @override
-  List<Object> get props => [posts];
+  List<Object> get props => [];
 }
 
-class UserInfoLoadSuccess extends UserState {
-  final User profile;
+// class UserPostsLoadSuccess extends UserState {
+//   final List<Post> posts;
 
-  UserInfoLoadSuccess(this.profile);
-}
+//   UserPostsLoadSuccess([this.posts = const []]);
+
+//   @override
+//   List<Object> get props => [posts];
+// }
+
+// class UserInfoLoadSuccess extends UserState {
+//   final User profile;
+
+//   UserInfoLoadSuccess(this.profile);
 
 class UserAccountUpdateSuccess extends UserState {
   final User user;

@@ -40,9 +40,9 @@ class PostBloc extends Bloc<PostEvent, PostState> {
 
     if (event is PostCreate) {
       try {
-        await postRepository.createPost(event.post);
+        final message = await postRepository.createPost(event.post);
         final posts = await postRepository.getPosts();
-        yield PostsLoadSuccess(posts);
+        yield PostCreateScuccess(message);
       } catch (_) {
         yield PostFail();
       }
