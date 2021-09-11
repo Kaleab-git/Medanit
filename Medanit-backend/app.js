@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const express = require('express');
 const config = require('config');
 const morgan = require('morgan');
+const cors = require('cors');
 
 const startupErrorHandler = require('./Middlewares/startupErrorHandlers');
 const catch404 = require('./Middlewares/catch404');
@@ -14,6 +15,7 @@ const auth = require('./routes/auth');
 
 const app = express();
 app.use(express.json());
+app.use(cors());   
 
 
 if(!config.get('jwtPrivateKey')){

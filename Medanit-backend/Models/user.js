@@ -5,6 +5,8 @@ const Joi = require('joi');
 const config = require('config');
 Joi.objectId = require('joi-objectid')(Joi);
 
+const { NotificationSchema } = require('./notification')
+
 const userSchema = new mongoose.Schema({
     name: {
         type: String,
@@ -70,7 +72,13 @@ const userSchema = new mongoose.Schema({
 
     dislikedComments: {
         type: [ mongoose.Schema.Types.ObjectId ]
+    },
+
+    notifications: {
+        type: [ NotificationSchema ],
+        default: [] 
     }
+    
 });
 
 userSchema.methods.generateAuthToken = function(){

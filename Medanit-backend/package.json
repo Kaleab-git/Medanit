@@ -12,6 +12,7 @@
   "dependencies": {
     "bcrypt": "^5.0.1",
     "config": "^3.3.6",
+    "cors": "^2.8.5",
     "express": "^4.14.0",
     "fawn": "^2.1.5",
     "joi": "^17.4.2",

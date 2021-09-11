@@ -14,7 +14,6 @@ router.post('/', async (req, res) => {
     if(error) return res.status(400).send(error.message);
 
     
-
     try{
         
         let user = await User.findOne( { username: value.username } )

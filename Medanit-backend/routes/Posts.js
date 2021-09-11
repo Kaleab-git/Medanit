@@ -5,6 +5,7 @@ const express = require('express');
 
 const { Post, validatePost, validatePut } = require('../Models/post');
 const { User } = require('../Models/user');
+const { Notification } = require('../Models/notification');
 const auth = require('../Middlewares/auth');
 
 const router = express.Router();
@@ -174,6 +175,8 @@ router.delete('/:id', auth, async  (req, res) => {
     try{
         let oldPost = await Post.findById(id);
         if(!oldPost) res.status(404).send('Resource not found!');
+        debug(oldPost.user_id.toString())
+        debug(currentUser)
         if(oldPost.user_id.toString() !== currentUser && !isAdmin) return res.status(403).send('Forbidden action!');
 
         oldPost.remove();
@@ -191,14 +194,36 @@ router.delete('/:id', auth, async  (req, res) => {
 async function handleUpvoteDownvoteNotification(req) {
     const action = req.query.action;
     const postId = req.params.id;
-    const userId = req.body.user_id;
+    const userId = req.user._id;
+
+    let post = await Post.findById(postId) ;
+    let user = await User.findById(post.user_id);
+
+    if(!post) return res.status(400).send('Invalid id.');
+
+    let notification = new Notification({
+        from: userId,
+        trigger: "",
+        target: "post",
+        targetId: postId,
+        date: new Date() 
+    });
 
     if (action) {
         if (action === "upvote") {
             debug(`Send a user who posted a post(id=${postId}) that ${userId} has liked his post`);
+            
+            notification.trigger = "like";
+            user.notifications.push(notification);
+            await user.save();
+
         }
         if (action === "downvote") {
             debug(`Send a user who posted a post(id=${postId}) that ${userId} has disliked his post`);
+
+            notification.trigger = "dislike";
+            user.notifications.push(notification);
+            await user.save();
         }
 
     }

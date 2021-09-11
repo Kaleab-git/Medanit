@@ -5,6 +5,7 @@ const express = require('express');
 const { Comment, validatePost, validatePut, validateId } = require('../Models/comment');
 const { Post } = require('../Models/post');
 const { User } = require('../Models/user');
+const { Notification } = require('../Models/notification');
 const auth = require('../Middlewares/auth');
 
 
@@ -51,16 +52,36 @@ router.get('/', auth, async (req, res) => {
 /* POST COMMENT */
 router.post('/', auth, async (req, res) => {
     const postId = req.params.post_id;
+    const userId = req.user._id;
 
     const { error, result } = validatePost(req.body);
     if (error) return res.status(400).send(error.message);
 
     if(!validateId(postId)) return res.status(404).send('Invalid Post Id!');
 
+
     // check if the post exists
     try{
         const post = await Post.findById(postId);
         if(!post) return res.status(404).send('Post with provided Id does not exist!');
+
+        let user = await User.findById(post.user_id);
+        if(!user) return res.status(400).send('Invalid id!');
+
+
+        if(user._id.toString() !== userId){
+            let notification = new Notification({
+                from: userId,
+                trigger: "comment",
+                target: "post",
+                targetId: postId,
+                date: new Date() 
+            });
+    
+            user.notifications.push(notification);
+            await user.save();
+        }
+
 
         let comment = new Comment({
             user_id: req.user._id,
@@ -158,14 +179,43 @@ router.delete('/:id', auth, async (req, res) => {
 async function handleUpvoteDownvoteNotification(req, res){
     const action = req.query.action;
     const commentId = req.params.id;
-    const userId = req.body.user_id;
+    const userId = req.user._id;
+
+    let comment = await Comment.findById(commentId);
+    let user = await User.findById(comment.user_id);
+    if(!user) return res.status(400).send('Invalid id!');
+
+    debug(user._id)
+    debug(userId)
+
+    if(user._id.toString() === userId) return;
+
+
+    let notification = new Notification({
+        from: userId,
+        trigger: "",
+        target: "comment",
+        targetId: commentId,
+        date: new Date() 
+    });
+
+    debug(notification)
+
     if (action) {
         if (action === "upvote") {
             debug(`Send a user who commented a comment(id=${commentId}) that a user(id=${userId}) has liked his post`);
+            
+            notification.trigger = "like";
+            user.notifications.push(notification);
+            await user.save();
         }
 
         if (action === "downvote") {
             debug(`Send a user who commented a comment(id=${commentId}) that a user(id=${userId}) has disliked his post`);
+            
+            notification.trigger = "dislike";
+            user.notifications.push(notification);
+            await user.save();
         }
     }
 }
