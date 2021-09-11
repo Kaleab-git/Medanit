@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const express = require('express');
 const config = require('config');
 const morgan = require('morgan');
+const cors = require('cors');
 
 const startupErrorHandler = require('./Middlewares/startupErrorHandlers');
 const catch404 = require('./Middlewares/catch404');
@@ -12,7 +13,9 @@ const comments = require('./routes/comments');
 const users = require('./routes/users');
 const auth = require('./routes/auth');
 
-const app = express();
+const app = express(); 
+app.use(cors());
+app.options('*', cors());
 app.use(express.json());
 
 
