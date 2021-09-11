@@ -1,8 +1,11 @@
 const debug = require('debug')('app:comments');  // set/export DEBUG=app:comments
+const _ = require('lodash');
 const express = require('express');
 
 const { Comment, validatePost, validatePut, validateId } = require('../Models/comment');
 const { Post } = require('../Models/post');
+const { User } = require('../Models/user');
+const { Notification } = require('../Models/notification');
 const auth = require('../Middlewares/auth');
 
 
@@ -49,28 +52,46 @@ router.get('/', auth, async (req, res) => {
 /* POST COMMENT */
 router.post('/', auth, async (req, res) => {
     const postId = req.params.post_id;
+    const userId = req.user._id;
 
     const { error, result } = validatePost(req.body);
     if (error) return res.status(400).send(error.message);
 
     if(!validateId(postId)) return res.status(404).send('Invalid Post Id!');
 
+
     // check if the post exists
     try{
         const post = await Post.findById(postId);
         if(!post) return res.status(404).send('Post with provided Id does not exist!');
+
+        let user = await User.findById(post.user_id);
+        if(!user) return res.status(400).send('Invalid id.');
+
+        let notification = new Notification({
+            from: userId,
+            trigger: "comment",
+            target: "post",
+            targetId: postId,
+            date: new Date() 
+        });
+
+        
+        debug(notification)
+        user.notifications.push(notification);
+        // await user.save();
 
         let comment = new Comment({
             user_id: req.user._id,
             content: req.body.content,
             post_id: postId,
             date: new Date()
-        });
+        }); 
 
         post.comments.push(comment);
-        post.save();
+        // post.save();
 
-        comment = await comment.save()
+        // comment = await comment.save()
         return res.status(201).send({...comment._doc, date: comment.date});
         
     }catch(err){
@@ -100,14 +121,17 @@ router.put('/:id', auth, async (req, res) => {
         // check if it exists first
         const oldComment = await Comment.findById(id);
         if(!oldComment) return res.status(404).send('Resource not found!');
-        if(oldComment.user_id.toString() !== currentUser && !isAdmin) return res.status(403).send('Forbidden action!');
         
         let result;
 
         if(req.query.action){
-            handleUpvoteDownvoteNotification(req);
-            result = await handleUpvoteDownvoteDB(req);
+            handleUpvoteDownvoteNotification(req, res);
+            result = await handleUpvoteDownvoteDB(req, res);
         }else{
+
+            if(oldComment.user_id.toString() !== currentUser && !isAdmin) return res.status(403).send('Forbidden action!');
+
+
             let newComment = {
                 content: req.body.content || oldComment.content
             };
@@ -150,40 +174,115 @@ router.delete('/:id', auth, async (req, res) => {
 
 
 
-async function handleUpvoteDownvoteNotification(req){
+async function handleUpvoteDownvoteNotification(req, res){
     const action = req.query.action;
     const commentId = req.params.id;
-    const userId = req.body.user_id;
+    const userId = req.user._id;
+
+    let comment = await Comment.findById(commentId);
+    let user = await User.findById(comment.user_id);
+    if(!comment) return res.status(400).send('Invalid id.');
+
+    let notification = new Notification({
+        from: userId,
+        trigger: "",
+        target: "comment",
+        targetId: commentId,
+        date: new Date() 
+    });
+
     if (action) {
         if (action === "upvote") {
             debug(`Send a user who commented a comment(id=${commentId}) that a user(id=${userId}) has liked his post`);
+            
+            notification.trigger = "like";
+            user.notifications.push(notification);
+            await user.save();
         }
 
         if (action === "downvote") {
             debug(`Send a user who commented a comment(id=${commentId}) that a user(id=${userId}) has disliked his post`);
+            
+            notification.trigger = "like";
+            user.notifications.push(notification);
+            await user.save();
         }
     }
 }
 
-async function handleUpvoteDownvoteDB(req){
+async function handleUpvoteDownvoteDB(req, res){
     const action = req.query.action;
-    const id = req.params.id;
+    const commentId = req.params.id;
+    const userId = req.user._id;
+    let hasLiked = hasDisliked = false;
+
+    const user = await User.findById(userId);
+    if(!user) return res.status(400).send('Invalid id;');
+
+    let likes = user.likedComments.map(obj => obj.toString());
+    let dislikes = user.dislikedComments.map(obj => obj.toString());
+
+    if(_.includes(likes, commentId)) hasLiked = true;
+    if(_.includes(dislikes, commentId)) hasDisliked = true;
+
+    async function alterLikes(value){
+        await Comment.updateOne({ _id: commentId }, {
+            $inc: {
+                likes: value
+            }
+        } , { new: true });
+
+        if(value === 1){
+            user.likedComments.push(commentId);
+            await user.save();
+        }else if(value === -1){
+            const updatedArr = _.remove(likes, commentId);
+            user.likedComments = updatedArr;
+            await user.save();
+        }
+    }
+
+    async function alterDislikes(value){
+        await Comment.updateOne({ _id: commentId }, {
+            $inc: {
+                dislikes: value
+            }
+        }, { new: true });
+
+        if(value === 1){
+            user.dislikedComments.push(commentId);
+            await user.save();
+        }else if(value === -1){
+            const updatedArr = _.remove(dislikes, commentId);
+            user.dislikedComments = updatedArr;
+            await user.save();
+        }   
+    }
 
     debug(action);
 
     if(action === "upvote"){
-        return await Comment.updateOne( {_id: id}, {
-            $inc: {
-                likes: 1
-            }},
-            { new: true })
+        
+        if(hasLiked){   
+            await alterLikes(-1);       
+
+        }else if(hasDisliked){
+            await alterLikes(1);
+            await alterDislikes(-1);
+
+        }else{
+            await alterLikes(1);
+        }
 
     }else if(action === "downvote"){
-        return await Comment.updateOne( {_id: id}, {
-            $inc: {
-                dislikes: 1
-            }}, 
-            { new: true });
+        if(hasLiked){
+            await alterDislikes(1);
+            await alterLikes(-1);
+        }else if(hasDisliked){
+            await alterDislikes(-1);
+        }else{
+            await alterDislikes(1);
+        }
     }
 
 }

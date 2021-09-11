@@ -5,6 +5,8 @@ const Joi = require('joi');
 const config = require('config');
 Joi.objectId = require('joi-objectid')(Joi);
 
+const { NotificationSchema } = require('./notification')
+
 const userSchema = new mongoose.Schema({
     name: {
         type: String,
@@ -54,7 +56,29 @@ const userSchema = new mongoose.Schema({
     birthdate: {
         type: Date,
         get: date => moment(date).format('LL')
+    },
+    
+    likedPosts: {
+        type: [ mongoose.Schema.Types.ObjectId ]
+    },
+
+    dislikedPosts: {
+        type: [ mongoose.Schema.Types.ObjectId ]
+    },
+
+    likedComments: {
+        type: [ mongoose.Schema.Types.ObjectId ]
+    },
+
+    dislikedComments: {
+        type: [ mongoose.Schema.Types.ObjectId ]
+    },
+
+    notifications: {
+        type: [ NotificationSchema ],
+        default: [] 
     }
+    
 });
 
 userSchema.methods.generateAuthToken = function(){

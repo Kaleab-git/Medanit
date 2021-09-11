@@ -75,6 +75,8 @@ router.get('/me', auth, async (req, res) => {
         const user = await User.findById(req.user._id);
         const posts = await Post.find( { user_id: req.user._id } );
 
+        if(!user) return res.status(400).send('Invalid id.');   
+
         postCount = posts.length;
         posts.forEach(post => {
             upvoteCount += post.likes;

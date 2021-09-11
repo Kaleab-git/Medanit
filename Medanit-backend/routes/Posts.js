@@ -1,8 +1,11 @@
+const _ = require('lodash');
 const mongoose = require('mongoose');
 const debug = require('debug')('app:posts');        // set/export DEBUG=app:posts
 const express = require('express');
 
 const { Post, validatePost, validatePut } = require('../Models/post');
+const { User } = require('../Models/user');
+const { Notification } = require('../Models/notification');
 const auth = require('../Middlewares/auth');
 
 const router = express.Router();
@@ -111,7 +114,6 @@ router.put('/:id', auth, async (req, res) => {
     try{
         oldPost = await Post.findById(id);
         if(!oldPost) return res.status(404).send('Resource not found!');
-        if(oldPost.user_id.toString() !== currentUser && !isAdmin) return res.status(403).send('Forbidden action!');
 
         if(req.query.action){
 
@@ -119,6 +121,8 @@ router.put('/:id', auth, async (req, res) => {
             await handleUpvoteDownvoteDB(req, res);
             return res.status(204).send();
         }else{
+
+            if(oldPost.user_id.toString() !== currentUser && !isAdmin) return res.status(403).send('Forbidden action!');
 
             let newPost = {
                 user_id: oldPost.user_id,
@@ -185,17 +189,39 @@ router.delete('/:id', auth, async  (req, res) => {
 
 
 
-async function handleUpvoteDownvoteNotification(req) {
+async function handleUpvoteDownvoteNotification(req, req) {
     const action = req.query.action;
     const postId = req.params.id;
-    const userId = req.body.user_id;
+    const userId = req.user._id;
+
+    let post = await Post.findById(postId) ;
+    let user = await User.findById(post.user_id);
+
+    if(!user || !post) return res.status(400).send('Invalid id.');
+
+    let notification = new Notification({
+        from: userId,
+        trigger: "",
+        target: "post",
+        targetId: postId,
+        date: new Date() 
+    });
 
     if (action) {
         if (action === "upvote") {
             debug(`Send a user who posted a post(id=${postId}) that ${userId} has liked his post`);
+            
+            notification.trigger = "like";
+            user.notifications.push(notification);
+            await user.save();
+
         }
         if (action === "downvote") {
             debug(`Send a user who posted a post(id=${postId}) that ${userId} has disliked his post`);
+
+            notification.trigger = "dislike";
+            user.notifications.push(notification);
+            await user.save();
         }
 
     }
@@ -204,21 +230,82 @@ async function handleUpvoteDownvoteNotification(req) {
 async function handleUpvoteDownvoteDB(req){
     const action = req.query.action;
     const postId = req.params.id;
+    const userId = req.user._id;
+    let hasLiked = hasDisliked = false;
+
+    const user = await User.findById(userId);
+    if(!user) return res.status(400).send('Invalid id;');
+
+    let likes = user.likedPosts.map(obj => obj.toString());
+    let dislikes = user.dislikedPosts.map(obj => obj.toString());
+
+    if(_.includes(likes, postId)) hasLiked = true;
+    if(_.includes(dislikes, postId)) hasDisliked = true;
+
+    async function alterLikes(value){
+        await Post.updateOne({ _id: postId }, {
+            $inc: {
+                likes: value
+            }}, 
+            { new: true }); 
+        
+        if(value === 1){
+            user.likedPosts.push(postId)
+            await user.save();
+        }else if(value === -1){
+            const updatedArr = _.remove(likes, postId);
+            user.likedPosts = updatedArr;
+            await user.save();
+        }
+    }
+
+    async function alterDislikes(value){
+        await Post.updateOne({ _id: postId }, {
+            $inc: {
+                dislikes: value
+            }}, 
+            { new: true }); 
+
+        if(value === 1){
+            user.dislikedPosts.push(postId)
+            await user.save();
+        }else if(value === -1){
+            const updatedArr = _.remove(dislikes, postId);
+            user.dislikedPosts = updatedArr;
+            await user.save();
+        }
+    }
+
 
     debug(action);
+
+
     if(action === "upvote"){
-        return await Post.updateOne({ _id: postId }, {
-            $inc: {
-                likes: 1
-            }}, 
-            { new: true });
+
+        if(hasLiked){   
+            await alterLikes(-1);       
+
+        }else if(hasDisliked){
+            await alterLikes(1);
+            await alterDislikes(-1);
+
+        }else{
+            await alterLikes(1);
+        }
+
+        
         
     }else if(action === "downvote"){
-        return await Post.updateOne({ _id: postId }, {
-            $inc: {
-                dislikes: 1
-            }}, 
-            { new: true });
+
+        if(hasLiked){
+            await alterDislikes(1);
+            await alterLikes(-1);
+        }else if(hasDisliked){
+            await alterDislikes(-1);
+        }else{
+            await alterDislikes(1);
+        }
+        
     }
     
     
